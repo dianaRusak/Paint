@@ -9,7 +9,6 @@
       <Title Value="Paint"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
-      <Icon Value="0"/>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -33,7 +32,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="3">
       <Unit0>
         <Filename Value="Paint.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -42,8 +41,14 @@
         <Filename Value="paint1.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="drawing.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Drawing"/>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

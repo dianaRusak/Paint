@@ -1,23 +1,28 @@
 object Form1: TForm1
-  Left = 110
+  Left = 33
   Height = 377
-  Top = 163
+  Top = 194
   Width = 571
   Caption = 'Векторный редактор'
   ClientHeight = 357
   ClientWidth = 571
+  Color = cl3DLight
   Menu = MainMenu1
   OnCreate = FormCreate
+  OnMouseDown = FormMouseDown
+  OnMouseMove = FormMouseMove
+  OnMouseUp = FormMouseUp
   LCLVersion = '1.6.4.0'
   object PaintBox1: TPaintBox
-    Left = 16
-    Height = 330
+    Left = 8
+    Height = 338
     Top = 8
-    Width = 533
-    Color = clBtnHighlight
-    Font.Color = clWindow
-    ParentColor = False
-    ParentFont = False
+    Width = 552
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    OnMouseDown = FormMouseDown
+    OnMouseMove = FormMouseMove
+    OnMouseUp = FormMouseUp
+    OnPaint = PaintBox1Paint
   end
   object MainMenu1: TMainMenu
     object MenuItem1: TMenuItem
