@@ -6,15 +6,18 @@
     <General>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="Paint"/>
+      <Title Value="Wannabe"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
+      <Icon Value="0"/>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
     <VersionInfo>
-      <StringTable ProductVersion=""/>
+      <UseVersionInfo Value="True"/>
+      <Language Value="0419"/>
+      <CharSet Value="04E3"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -32,30 +35,36 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="4">
       <Unit0>
-        <Filename Value="Paint.lpr"/>
+        <Filename Value="Wannabe.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="paint1.pas"/>
+        <Filename Value="main.pp"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form1"/>
+        <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Main"/>
       </Unit1>
       <Unit2>
-        <Filename Value="drawing.pas"/>
+        <Filename Value="canvasfigures.pp"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Drawing"/>
+        <UnitName Value="CanvasFigures"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="editortools.pp"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="EditorTools"/>
+      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="Paint"/>
+      <Filename Value="Wannabe"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>

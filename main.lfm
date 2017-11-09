@@ -1,0 +1,183 @@
+object MainForm: TMainForm
+  Left = 395
+  Height = 480
+  Top = 130
+  Width = 640
+  ClientHeight = 460
+  ClientWidth = 640
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 640
+  Menu = MainMenu
+  OnCreate = FormCreate
+  Position = poDesktopCenter
+  LCLVersion = '1.6.4.0'
+  Visible = True
+  object ToolBox: TPanel
+    Left = 0
+    Height = 460
+    Top = 0
+    Width = 128
+    Align = alLeft
+    BevelInner = bvRaised
+    BevelOuter = bvNone
+    ClientHeight = 460
+    ClientWidth = 128
+    TabOrder = 0
+    object lblTools: TLabel
+      Left = 8
+      Height = 13
+      Top = 8
+      Width = 72
+      Caption = 'Инструменты:'
+      ParentColor = False
+    end
+    object lstTools: TListBox
+      Left = 8
+      Height = 128
+      Top = 24
+      Width = 107
+      ExtendedSelect = False
+      ItemHeight = 0
+      OnSelectionChange = lstToolsSelectionChange
+      TabOrder = 0
+    end
+    object lblPenColor: TLabel
+      Left = 8
+      Height = 13
+      Top = 160
+      Width = 63
+      Caption = 'Цвет линии:'
+      ParentColor = False
+    end
+    object clrPenColor: TColorBox
+      Left = 8
+      Height = 22
+      Top = 176
+      Width = 107
+      ColorRectWidth = 8
+      Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames]
+      ItemHeight = 16
+      TabOrder = 1
+    end
+    object lblPenStyle: TLabel
+      Left = 8
+      Height = 13
+      Top = 200
+      Width = 68
+      Caption = 'Стиль линии:'
+      ParentColor = False
+    end
+    object cmbPenStyle: TComboBox
+      Left = 8
+      Height = 21
+      Top = 216
+      Width = 107
+      ItemHeight = 13
+      Style = csDropDownList
+      TabOrder = 2
+    end
+    object lblWidth: TLabel
+      Left = 8
+      Height = 13
+      Top = 240
+      Width = 82
+      Caption = 'Толщина линии:'
+      ParentColor = False
+    end
+    object trkWidth: TTrackBar
+      Left = 8
+      Height = 22
+      Top = 256
+      Width = 107
+      Max = 16
+      Min = 1
+      Position = 1
+      TabOrder = 3
+    end
+    object lblBrushColor: TLabel
+      Left = 8
+      Height = 13
+      Top = 288
+      Width = 74
+      Caption = 'Цвет заливки:'
+      ParentColor = False
+    end
+    object clrBrushColor: TColorBox
+      Left = 8
+      Height = 22
+      Top = 304
+      Width = 107
+      ColorRectWidth = 8
+      DefaultColorColor = clWhite
+      Selected = clWhite
+      Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames]
+      ItemHeight = 16
+      TabOrder = 4
+    end
+    object lblBrushStyle: TLabel
+      Left = 8
+      Height = 13
+      Top = 328
+      Width = 79
+      Caption = 'Стиль заливки:'
+      ParentColor = False
+    end
+    object cmbBrushStyle: TComboBox
+      Left = 8
+      Height = 21
+      Top = 344
+      Width = 107
+      ItemHeight = 13
+      Style = csDropDownList
+      TabOrder = 5
+    end
+    object chkTransparent: TCheckBox
+      Left = 24
+      Height = 17
+      Top = 368
+      Width = 81
+      Caption = 'Не заливать'
+      Checked = True
+      State = cbChecked
+      TabOrder = 6
+    end
+  end
+  object PaintBox: TPaintBox
+    Cursor = crCross
+    Left = 128
+    Height = 460
+    Top = 0
+    Width = 512
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Color = clWhite
+    ParentColor = False
+    OnMouseDown = PaintBoxMouseDown
+    OnMouseMove = PaintBoxMouseMove
+    OnMouseUp = PaintBoxMouseUp
+    OnPaint = PaintBoxPaint
+  end
+  object MainMenu: TMainMenu
+    left = 544
+    top = 64
+    object miFile: TMenuItem
+      Caption = 'Файл'
+      object miExit: TMenuItem
+        Caption = 'Выход'
+      end
+    end
+    object miEdit: TMenuItem
+      Caption = 'Правка'
+      object miClearImage: TMenuItem
+        Caption = 'Очистить изображение'
+        OnClick = miClearImageClick
+      end
+    end
+    object miHelp: TMenuItem
+      Caption = 'Справка'
+      object miAbout: TMenuItem
+        Caption = 'О программе'
+        OnClick = miAboutClick
+      end
+    end
+  end
+end
