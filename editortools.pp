@@ -2,6 +2,7 @@ unit EditorTools;
 
 {$MODE OBJFPC}
 {$LONGSTRINGS ON}
+{$STATIC ON}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -11,11 +12,11 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  CanvasFigures;
+  CanvasFigures, ToolsParams;
 
 const
 
-  cPenStylesTable: array[0..4] of record 
+  cPenStylesTable: array[0..4] of record
     Name: String;
     Style: TPenStyle;
   end = (
@@ -26,10 +27,11 @@ const
     (Name: 'Точка-точка-тире'; Style: psDashDotDot)
   );
 
-  cBrushStylesTable: array[0..6] of record 
+  cBrushStylesTable: array[0..7] of record
     Name: String;
     Style: TBrushStyle;
   end = (
+    (Name : 'Без заливки'; Style:bsClear),
     (Name: 'Сплошной'; Style: bsSolid),
     (Name: 'Горизонтали'; Style: bsHorizontal),
     (Name: 'Вертикали'; Style: bsVertical),
@@ -49,8 +51,13 @@ type
   // Finish() - Завершает рисование фигуры. Возвращает, удалось ли это сделать.
   // По умолчанию Update() и Finish() возвращают, не равен ли индекс константе cFigureIndexInvalid.
 
+	{ TEditorTool }
+
   TEditorTool = class
+  private
+    class function GetParams: TToolParamsList; static; virtual;
   public
+    class property Params: TToolParamsList read GetParams;
     class function GetName(): String; virtual; abstract;
     class function GetFigureClass(): TCanvasFigureClass; virtual; abstract;
     class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); virtual;
@@ -59,23 +66,42 @@ type
     class function Finish(aFigureIndex: SizeInt): Boolean; virtual;
   end;
 
+	{ TToolPen }
+
   TToolPen = class(TEditorTool)
+  private
+    class var
+      FParams: TToolParamsList;
+    class function GetParams: TToolParamsList; static; override;
   public
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
+
+	{ TToolLine }
 
   TToolLine = class(TEditorTool)
+  private
+    class var
+      FParams: TToolParamsList;
+    class function GetParams: TToolParamsList; static; override;
   public
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+
   end;
 
+	{ TToolPolyline }
+
   TToolPolyline = class(TEditorTool)
+  private
+    class var
+      FParams: TToolParamsList;
+    class function GetParams: TToolParamsList; static; override;
   public
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
@@ -84,6 +110,10 @@ type
   end;
 
   TToolRectangle = class(TEditorTool)
+  private
+	  class var
+	    FParams: TToolParamsList;
+  class function GetParams: TToolParamsList; static; override;
   public
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
@@ -92,6 +122,10 @@ type
   end;
 
   TToolEllipse = class(TEditorTool)
+  private
+    class var
+      FParams: TToolParamsList;
+    class function GetParams: TToolParamsList; static; override;
   public
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
@@ -132,6 +166,11 @@ end;
 // TEditorTool
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+class function TEditorTool.GetParams: TToolParamsList;
+begin
+  Result := nil;
+end;
+
 class procedure TEditorTool.Start(aFigureIndex: SizeInt; aXY: TPoint);
 begin
   with GetFigure(aFigureIndex) do begin
@@ -153,6 +192,11 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TToolPen
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class function TToolPen.GetParams: TToolParamsList;
+begin
+	Result := FParams;
+end;
 
 class function TToolPen.GetName(): String;
 begin
@@ -179,6 +223,11 @@ end;
 // TToolLine
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+class function TToolLine.GetParams: TToolParamsList;
+begin
+	Result := FParams;
+end;
+
 class function TToolLine.GetName(): String;
 begin
   Result := 'Линия';
@@ -203,6 +252,11 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TToolPolyline
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class function TToolPolyline.GetParams: TToolParamsList;
+begin
+	Result := FParams;
+end;
 
 class function TToolPolyline.GetName(): String;
 begin
@@ -234,6 +288,11 @@ end;
 // TToolRectangle
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+class function TToolRectangle.GetParams: TToolParamsList;
+begin
+	Result := FParams;
+end;
+
 class function TToolRectangle.GetName(): String;
 begin
   Result := 'Прямоугольник';
@@ -258,6 +317,11 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TToolEllipse
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class function TToolEllipse.GetParams: TToolParamsList;
+begin
+	Result := FParams;
+end;
 
 class function TToolEllipse.GetName(): String;
 begin
@@ -294,5 +358,31 @@ initialization
     TToolEllipse
   );
 
+  TToolLine.FParams := TToolParamsList.Create(
+    TColorLineParam.Create,
+    TWidthLineParam.Create,
+    TStyleLineParam.Create
+  );
+  TToolPen.FParams := TToolParamsList.Create(
+    TColorLineParam.Create,
+    TWidthLineParam.Create,
+    TStyleLineParam.Create
+  );
+  TToolPolyline.FParams := TToolParamsList.Create(
+    TColorLineParam.Create,
+    TWidthLineParam.Create,
+    TStyleLineParam.Create
+  );
+  TToolRectangle.FParams := TToolParamsList.Create(
+    TColorLineParam.Create,
+    TWidthLineParam.Create,
+    TStyleLineParam.Create,
+    TFillStyleParam.Create
+  );
+  TToolEllipse.FParams := TToolParamsList.Create(
+    TColorLineParam.Create,
+    TWidthLineParam.Create,
+    TStyleLineParam.Create,
+    TFillStyleParam.Create
+  );
 end.
-

@@ -13,13 +13,14 @@ uses
   Classes, SysUtils, Graphics,
   Forms, Dialogs, Menus, Buttons, ColorBox,
   Controls, ExtCtrls, StdCtrls, ComCtrls,
-  EditorTools;
+  EditorTools, ToolsParams;
 
 type
 
   { TMainForm }
 
   TMainForm = class(TForm)
+		ToolParamsPanel: TPanel;
     ToolBox: TPanel;
     lblTools: TLabel;
     lstTools: TListBox;
@@ -33,7 +34,6 @@ type
     clrBrushColor: TColorBox;
     lblBrushStyle: TLabel;
     cmbBrushStyle: TComboBox;
-    chkTransparent: TCheckBox;
     PaintBox: TPaintBox;
     MainMenu: TMainMenu;
     miFile: TMenuItem;
@@ -55,6 +55,9 @@ type
     procedure lstToolsSelectionChange(Sender: TObject; User: boolean);
     procedure miClearImageClick(Sender: TObject);
     procedure miAboutClick(Sender: TObject);
+		procedure ToolParamsPanelMouseDown(Sender: TObject; Button: TMouseButton;
+			Shift: TShiftState; X, Y: Integer);
+
 
   strict private
     fCurrentToolClass: TEditorToolClass;
@@ -88,7 +91,6 @@ begin
     lstTools.Items.Add(GetEditorTool(i).GetName());
 
   lstTools.ItemIndex := 0;
-  fCurrentToolClass := GetEditorTool(lstTools.ItemIndex);
 
   fCurrentFigureIndex := cFigureIndexInvalid;
 
@@ -114,7 +116,6 @@ begin
     PenColor := clrPenColor.Selected;
     BrushStyle := cBrushStylesTable[cmbBrushStyle.ItemIndex].Style;
     BrushColor := clrBrushColor.Selected;
-    Transparent := chkTransparent.Checked;
   end;
 
   ToolBox.Enabled := False;
@@ -126,9 +127,6 @@ end;
 
 procedure TMainForm.PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
-  //if (X < 0) or (Y < 0) or (X > PaintBox.Width) or (Y > PaintBox.Height) then
-  //  Exit;
-
   if fCurrentToolClass.Update(fCurrentFigureIndex, Point(X, Y)) then
     PaintBox.Invalidate();
 end;
@@ -160,8 +158,24 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 procedure TMainForm.lstToolsSelectionChange(Sender: TObject; User: boolean);
+var
+  i: TToolParam;
+  l: TLabel;
 begin
   fCurrentToolClass := GetEditorTool(lstTools.ItemIndex);
+  ToolParamsPanel.DestroyComponents;
+  for i in fCurrentToolClass.Params do
+  begin
+    ToolParamsPanel.Visible := False;
+    i.ToControl(ToolParamsPanel).Align := alBottom;
+
+    l := TLabel.Create(ToolParamsPanel);
+    l.Parent := ToolParamsPanel;
+    l.Caption := i.Name;
+    l.Align := alBottom;
+    ToolParamsPanel.Visible := True;
+    Invalidate;
+	end;
 end;
 
 procedure TMainForm.miClearImageClick(Sender: TObject);
@@ -181,6 +195,12 @@ begin
     'Русак Диана Игоревна, Б8103а, ДВФУ, 2017 год.',
     mtInformation, [mbOK], 0
   );
+end;
+
+procedure TMainForm.ToolParamsPanelMouseDown(Sender: TObject;
+	Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+
 end;
 
 end.

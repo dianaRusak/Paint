@@ -35,7 +35,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="4">
+    <Units Count="6">
       <Unit0>
         <Filename Value="Wannabe.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -58,6 +58,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="EditorTools"/>
       </Unit3>
+      <Unit4>
+        <Filename Value="toolsparams.pp"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ToolsParams"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="transform.pp"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Transform"/>
+      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

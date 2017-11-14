@@ -1,10 +1,10 @@
 object MainForm: TMainForm
-  Left = 395
+  Left = 357
   Height = 480
-  Top = 130
-  Width = 640
+  Top = 124
+  Width = 701
   ClientHeight = 460
-  ClientWidth = 640
+  ClientWidth = 701
   Constraints.MinHeight = 480
   Constraints.MinWidth = 640
   Menu = MainMenu
@@ -25,9 +25,9 @@ object MainForm: TMainForm
     TabOrder = 0
     object lblTools: TLabel
       Left = 8
-      Height = 13
+      Height = 15
       Top = 8
-      Width = 72
+      Width = 79
       Caption = 'Инструменты:'
       ParentColor = False
     end
@@ -43,9 +43,9 @@ object MainForm: TMainForm
     end
     object lblPenColor: TLabel
       Left = 8
-      Height = 13
+      Height = 15
       Top = 160
-      Width = 63
+      Width = 67
       Caption = 'Цвет линии:'
       ParentColor = False
     end
@@ -56,38 +56,40 @@ object MainForm: TMainForm
       Width = 107
       ColorRectWidth = 8
       Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames]
+      AutoComplete = True
+      AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
       ItemHeight = 16
       TabOrder = 1
     end
     object lblPenStyle: TLabel
       Left = 8
-      Height = 13
+      Height = 15
       Top = 200
-      Width = 68
+      Width = 74
       Caption = 'Стиль линии:'
       ParentColor = False
     end
     object cmbPenStyle: TComboBox
       Left = 8
-      Height = 21
+      Height = 23
       Top = 216
       Width = 107
-      ItemHeight = 13
+      ItemHeight = 15
       Style = csDropDownList
       TabOrder = 2
     end
     object lblWidth: TLabel
       Left = 8
-      Height = 13
+      Height = 15
       Top = 240
-      Width = 82
+      Width = 93
       Caption = 'Толщина линии:'
       ParentColor = False
     end
     object trkWidth: TTrackBar
       Left = 8
       Height = 22
-      Top = 256
+      Top = 264
       Width = 107
       Max = 16
       Min = 1
@@ -96,9 +98,9 @@ object MainForm: TMainForm
     end
     object lblBrushColor: TLabel
       Left = 8
-      Height = 13
+      Height = 15
       Top = 288
-      Width = 74
+      Width = 76
       Caption = 'Цвет заливки:'
       ParentColor = False
     end
@@ -116,30 +118,28 @@ object MainForm: TMainForm
     end
     object lblBrushStyle: TLabel
       Left = 8
-      Height = 13
+      Height = 15
       Top = 328
-      Width = 79
+      Width = 83
       Caption = 'Стиль заливки:'
       ParentColor = False
     end
     object cmbBrushStyle: TComboBox
       Left = 8
-      Height = 21
+      Height = 23
       Top = 344
       Width = 107
-      ItemHeight = 13
+      ItemHeight = 15
       Style = csDropDownList
       TabOrder = 5
     end
-    object chkTransparent: TCheckBox
-      Left = 24
-      Height = 17
-      Top = 368
-      Width = 81
-      Caption = 'Не заливать'
-      Checked = True
-      State = cbChecked
+    object ToolParamsPanel: TPanel
+      Left = 0
+      Height = 298
+      Top = 160
+      Width = 128
       TabOrder = 6
+      OnMouseDown = ToolParamsPanelMouseDown
     end
   end
   object PaintBox: TPaintBox
@@ -147,7 +147,7 @@ object MainForm: TMainForm
     Left = 128
     Height = 460
     Top = 0
-    Width = 512
+    Width = 573
     Anchors = [akTop, akLeft, akRight, akBottom]
     Color = clWhite
     ParentColor = False

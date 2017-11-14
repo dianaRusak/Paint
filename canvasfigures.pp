@@ -156,13 +156,9 @@ begin
   aCanvas.Pen.Width := fWidth;
   aCanvas.Pen.Style := fPenStyle;
   aCanvas.Pen.Color := fPenColor;
-
-  if fTransparent then begin
-    aCanvas.Brush.Style := bsClear;
-  end else begin
-    aCanvas.Brush.Style := fBrushStyle;
+  aCanvas.Brush.Style := fBrushStyle;
+ if fBrushStyle <> bsClear then
     aCanvas.Brush.Color := fBrushColor;
-  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
