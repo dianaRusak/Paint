@@ -13,33 +13,6 @@ uses
   Classes, SysUtils, Graphics, Transform, Controls,
   CanvasFigures, ToolsParams;
 
-const
-
-  cPenStylesTable: array[0..4] of record
-    Name: String;
-    Style: TPenStyle;
-  end = (
-    (Name: 'Сплошной'; Style: psSolid),
-    (Name: 'Прерывистый'; Style: psDash),
-    (Name: 'Точечный'; Style: psDot),
-    (Name: 'Точка-тире'; Style: psDashDot),
-    (Name: 'Точка-точка-тире'; Style: psDashDotDot)
-  );
-
-  cBrushStylesTable: array[0..7] of record
-    Name: String;
-    Style: TBrushStyle;
-  end = (
-    (Name : 'Без заливки'; Style:bsClear),
-    (Name: 'Сплошной'; Style: bsSolid),
-    (Name: 'Горизонтали'; Style: bsHorizontal),
-    (Name: 'Вертикали'; Style: bsVertical),
-    (Name: 'Диагонали \'; Style: bsFDiagonal),
-    (Name: 'Диагонали /'; Style: bsBDiagonal),
-    (Name: 'Прямые клетки'; Style: bsCross),
-    (Name: 'Косые клетки'; Style: bsDiagCross)
-  );
-
 type
 
   // GetName() - Возвращает название инструмента.
@@ -56,7 +29,8 @@ type
   private
     class function GetParams: TToolParamsList; static; virtual;
   public
-    class property Params: TToolParamsList read GetParams;
+		class procedure SetFigureParams (aFigureIndex: SizeInt); virtual; abstract;
+		class property Params: TToolParamsList read GetParams;
     class function GetName(): String; virtual; abstract;
     class function GetFigureClass(): TCanvasFigureClass; virtual; abstract;
     class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); virtual;
@@ -73,6 +47,7 @@ type
       FParams: TToolParamsList;
     class function GetParams: TToolParamsList; static; override;
   public
+    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
@@ -87,6 +62,7 @@ type
       FParams: TToolParamsList;
     class function GetParams: TToolParamsList; static; override;
   public
+    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
@@ -102,6 +78,7 @@ type
       FParams: TToolParamsList;
     class function GetParams: TToolParamsList; static; override;
   public
+    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
@@ -116,6 +93,7 @@ type
 	    FParams: TToolParamsList;
   class function GetParams: TToolParamsList; static; override;
   public
+    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
@@ -130,6 +108,7 @@ type
       FParams: TToolParamsList;
     class function GetParams: TToolParamsList; static; override;
   public
+    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
@@ -144,6 +123,7 @@ type
       FCanDraw: boolean;
     class function GetParams: TToolParamsList; static; override;
   public
+    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
@@ -159,6 +139,7 @@ type
       FCanDraw: boolean;
     class function GetParams: TToolParamsList; static; override;
   public
+    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
@@ -209,6 +190,11 @@ begin
 	Result:=inherited GetParams;
 end;
 
+class procedure TToolZoom.SetFigureParams(aFigureIndex: SizeInt);
+begin
+
+end;
+
 class procedure TToolZoom.Start(aFigureIndex: SizeInt; aXY: TPoint);
 begin
 	inherited Start(aFigureIndex, aXY);
@@ -243,6 +229,11 @@ end;
 class function TToolHand.GetParams: TToolParamsList;
 begin
 	Result:=inherited GetParams;
+end;
+
+class procedure TToolHand.SetFigureParams(aFigureIndex: SizeInt);
+begin
+
 end;
 
 class procedure TToolHand.Start(aFigureIndex: SizeInt; aXY: TPoint);
@@ -313,6 +304,16 @@ begin
 	Result := FParams;
 end;
 
+class procedure TToolPen.SetFigureParams(aFigureIndex: SizeInt);
+var
+  fFigure: TCanvasFigure;
+begin
+  fFigure := GetFigure(aFigureIndex);
+  fFigure.PenColor := (FParams[0] as TColorLineParam).Value;
+  fFigure.Width := (FParams[1] as TWidthLineParam).Value;
+  fFigure.PenStyle := (FParams[2] as TStyleLineParam).Value;
+end;
+
 class function TToolPen.GetName(): String;
 begin
   Result := 'Карандаш';
@@ -343,6 +344,16 @@ begin
 	Result := FParams;
 end;
 
+class procedure TToolLine.SetFigureParams(aFigureIndex: SizeInt);
+var
+  fFigure: TCanvasFigure;
+begin
+  fFigure := GetFigure(aFigureIndex);
+  fFigure.PenColor := (FParams[0] as TColorLineParam).Value;
+  fFigure.Width := (FParams[1] as TWidthLineParam).Value;
+  fFigure.PenStyle := (FParams[2] as TStyleLineParam).Value;
+end;
+
 class function TToolLine.GetName(): String;
 begin
   Result := 'Линия';
@@ -371,6 +382,16 @@ end;
 class function TToolPolyline.GetParams: TToolParamsList;
 begin
 	Result := FParams;
+end;
+
+class procedure TToolPolyline.SetFigureParams(aFigureIndex: SizeInt);
+var
+  fFigure: TCanvasFigure;
+begin
+  fFigure := GetFigure(aFigureIndex);
+  fFigure.PenColor := (FParams[0] as TColorLineParam).Value;
+  fFigure.Width := (FParams[1] as TWidthLineParam).Value;
+  fFigure.PenStyle := (FParams[2] as TStyleLineParam).Value;
 end;
 
 class function TToolPolyline.GetName(): String;
@@ -408,6 +429,18 @@ begin
 	Result := FParams;
 end;
 
+class procedure TToolRectangle.SetFigureParams(aFigureIndex: SizeInt);
+var
+  fFigure: TCanvasFigure;
+begin
+  fFigure := GetFigure(aFigureIndex);
+  fFigure.PenColor := (FParams[0] as TColorLineParam).Value;
+  fFigure.BrushColor := (FParams[1] as TColorBrushParam).Value;
+  fFigure.Width := (FParams[2] as TWidthLineParam).Value;
+  fFigure.PenStyle := (FParams[3] as TStyleLineParam).Value;
+  fFigure.BrushStyle := (FParams[4] as TFillStyleParam).Value;
+end;
+
 class function TToolRectangle.GetName(): String;
 begin
   Result := 'Прямоугольник';
@@ -436,6 +469,18 @@ end;
 class function TToolEllipse.GetParams: TToolParamsList;
 begin
 	Result := FParams;
+end;
+
+class procedure TToolEllipse.SetFigureParams(aFigureIndex: SizeInt);
+var
+  fFigure: TCanvasFigure;
+begin
+  fFigure := GetFigure(aFigureIndex);
+  fFigure.PenColor := (FParams[0] as TColorLineParam).Value;
+  fFigure.BrushColor := (FParams[1] as TColorBrushParam).Value;;
+  fFigure.Width := (FParams[2] as TWidthLineParam).Value;
+  fFigure.PenStyle := (FParams[3] as TStyleLineParam).Value;
+  fFigure.BrushStyle := (FParams[4] as TFillStyleParam).Value;
 end;
 
 class function TToolEllipse.GetName(): String;
@@ -493,12 +538,14 @@ initialization
   );
   TToolRectangle.FParams := TToolParamsList.Create(
     TColorLineParam.Create,
+    TColorBrushParam.Create,
     TWidthLineParam.Create,
     TStyleLineParam.Create,
     TFillStyleParam.Create
   );
   TToolEllipse.FParams := TToolParamsList.Create(
     TColorLineParam.Create,
+    TColorBrushParam.Create,
     TWidthLineParam.Create,
     TStyleLineParam.Create,
     TFillStyleParam.Create

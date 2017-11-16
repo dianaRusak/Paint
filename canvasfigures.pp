@@ -76,9 +76,16 @@ type
 
   FFigureEmpty = class(TCanvasFigure)
   public
-      procedure Draw(aCanvas: TCanvas); override;
+    procedure Draw(aCanvas: TCanvas); override;
 	end;
 
+{	{ FFigureRoundRect }
+
+  FFigureRoundRect = class(TCanvasFigure)
+  public
+    procedure Draw(aCanvas: TCanvas); override;
+	end;
+}
   TCanvasFigureClass = class of TCanvasFigure;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +282,17 @@ begin
   cPoints := GetCanvasPoints();
   aCanvas.Rectangle(cPoints[0].x, cPoints[0].y, cPoints[1].x, cPoints[1].y);
 end;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//FFigureRoundRect
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
+{procedure FFigureRoundRect.Draw(aCanvas: TCanvas);
+begin
+	inherited;
+  cPoints := GetCanvasPoints();
+  aCanvas.Rectangle(cPoints[0].x, cPoints[0].y, cPoints[1].x, cPoints[1].y);
+end;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TFigureEllipse
 ////////////////////////////////////////////////////////////////////////////////////////////////////

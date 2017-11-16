@@ -4,13 +4,13 @@
     <PathDelim Value="\"/>
     <Version Value="10"/>
     <BuildModes Active="Default"/>
-    <Units Count="16">
+    <Units Count="18">
       <Unit0>
         <Filename Value="Wannabe.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="17" Y="4"/>
-        <UsageCount Value="52"/>
+        <UsageCount Value="55"/>
       </Unit0>
       <Unit1>
         <Filename Value="main.pp"/>
@@ -19,10 +19,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Main"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="152"/>
-        <CursorPos X="21" Y="166"/>
-        <UsageCount Value="52"/>
+        <TopLine Value="111"/>
+        <CursorPos X="8" Y="121"/>
+        <UsageCount Value="55"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -30,10 +29,11 @@
         <Filename Value="canvasfigures.pp"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CanvasFigures"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="264"/>
-        <CursorPos X="5" Y="19"/>
-        <UsageCount Value="52"/>
+        <TopLine Value="71"/>
+        <CursorPos X="2" Y="88"/>
+        <UsageCount Value="55"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
@@ -41,9 +41,9 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="EditorTools"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="172"/>
-        <CursorPos X="33" Y="270"/>
-        <UsageCount Value="52"/>
+        <TopLine Value="424"/>
+        <CursorPos X="36" Y="439"/>
+        <UsageCount Value="55"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
@@ -51,28 +51,26 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="ToolsParams"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="199"/>
-        <CursorPos Y="11"/>
-        <UsageCount Value="51"/>
+        <TopLine Value="255"/>
+        <CursorPos X="42" Y="263"/>
+        <UsageCount Value="54"/>
         <Loaded Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="transform.pp"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Transform"/>
-        <EditorIndex Value="4"/>
-        <TopLine Value="42"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="23" Y="63"/>
-        <UsageCount Value="39"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="42"/>
       </Unit5>
       <Unit6>
         <Filename Value="C:\lazarus\lcl\comctrls.pp"/>
         <UnitName Value="ComCtrls"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="4014"/>
-        <CursorPos X="22" Y="2703"/>
-        <UsageCount Value="8"/>
+        <TopLine Value="2606"/>
+        <CursorPos X="15" Y="2619"/>
+        <UsageCount Value="10"/>
       </Unit6>
       <Unit7>
         <Filename Value="C:\lazarus\lcl\colorbox.pas"/>
@@ -144,127 +142,141 @@
         <CursorPos X="3" Y="2601"/>
         <UsageCount Value="9"/>
       </Unit15>
+      <Unit16>
+        <Filename Value="..\VecDraw-master\utoolparams.pas"/>
+        <UnitName Value="UToolParams"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="200"/>
+        <UsageCount Value="10"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="C:\lazarus\lcl\include\trackbar.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="158"/>
+        <CursorPos X="3" Y="167"/>
+        <UsageCount Value="10"/>
+      </Unit17>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="main.pp"/>
-        <Caret Line="199" Column="46" TopLine="183"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="50" Column="24" TopLine="26"/>
       </Position1>
       <Position2>
-        <Filename Value="canvasfigures.pp"/>
-        <Caret Line="89" Column="10" TopLine="74"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="303" Column="31" TopLine="278"/>
       </Position2>
       <Position3>
-        <Filename Value="canvasfigures.pp"/>
-        <Caret Line="35" Column="19" TopLine="13"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="65" Column="26" TopLine="54"/>
       </Position3>
       <Position4>
-        <Filename Value="main.pp"/>
-        <Caret Line="204" Column="64" TopLine="183"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="81" Column="26" TopLine="67"/>
       </Position4>
       <Position5>
-        <Filename Value="main.pp"/>
-        <Caret Line="13" Column="44"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="96" Column="29" TopLine="83"/>
       </Position5>
       <Position6>
-        <Filename Value="main.pp"/>
-        <Caret Line="51" Column="25" TopLine="39"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="430" Column="62" TopLine="411"/>
       </Position6>
       <Position7>
-        <Filename Value="main.pp"/>
-        <Caret Line="216" Column="38" TopLine="190"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="111" Column="21" TopLine="96"/>
       </Position7>
       <Position8>
         <Filename Value="editortools.pp"/>
-        <Caret Line="230" TopLine="213"/>
+        <Caret Line="146" Column="27" TopLine="131"/>
       </Position8>
       <Position9>
-        <Filename Value="canvasfigures.pp"/>
-        <Caret Line="31" Column="25" TopLine="19"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="430" Column="63" TopLine="499"/>
       </Position9>
       <Position10>
         <Filename Value="toolsparams.pp"/>
-        <Caret Line="11"/>
+        <Caret Line="45" Column="18" TopLine="20"/>
       </Position10>
       <Position11>
-        <Filename Value="transform.pp"/>
-        <Caret Line="12" TopLine="5"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="520" Column="27" TopLine="499"/>
       </Position11>
       <Position12>
-        <Filename Value="main.pp"/>
-        <Caret Line="217" Column="19" TopLine="190"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="111" Column="21" TopLine="96"/>
       </Position12>
       <Position13>
-        <Filename Value="main.pp"/>
-        <Caret Line="211" Column="6" TopLine="191"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="465" Column="3" TopLine="463"/>
       </Position13>
       <Position14>
-        <Filename Value="main.pp"/>
-        <Caret Line="221" Column="3" TopLine="195"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="126" Column="21" TopLine="111"/>
       </Position14>
       <Position15>
-        <Filename Value="main.pp"/>
-        <Caret Line="205" Column="49" TopLine="192"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="231" Column="3" TopLine="229"/>
       </Position15>
       <Position16>
-        <Filename Value="main.pp"/>
-        <Caret Line="224" Column="5" TopLine="202"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="142" Column="21" TopLine="127"/>
       </Position16>
       <Position17>
-        <Filename Value="main.pp"/>
-        <Caret Line="234" Column="32" TopLine="207"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="550" TopLine="522"/>
       </Position17>
       <Position18>
-        <Filename Value="main.pp"/>
-        <Caret Line="231" Column="64" TopLine="207"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="476" Column="3" TopLine="461"/>
       </Position18>
       <Position19>
-        <Filename Value="main.pp"/>
-        <Caret Line="234" Column="32" TopLine="207"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="69" Column="48" TopLine="54"/>
       </Position19>
       <Position20>
-        <Filename Value="main.pp"/>
-        <Caret Line="222" Column="3" TopLine="207"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="476" Column="22" TopLine="429"/>
       </Position20>
       <Position21>
-        <Filename Value="main.pp"/>
-        <Caret Line="234" Column="24" TopLine="207"/>
+        <Filename Value="toolsparams.pp"/>
+        <Caret Line="268" TopLine="246"/>
       </Position21>
       <Position22>
         <Filename Value="main.pp"/>
-        <Caret Line="235" Column="37" TopLine="209"/>
+        <Caret Line="119" Column="27" TopLine="111"/>
       </Position22>
       <Position23>
         <Filename Value="main.pp"/>
-        <Caret Line="250" Column="5" TopLine="221"/>
+        <Caret Line="120" Column="27" TopLine="112"/>
       </Position23>
       <Position24>
         <Filename Value="main.pp"/>
-        <Caret Line="54" Column="30" TopLine="54"/>
+        <Caret Line="119" Column="27" TopLine="111"/>
       </Position24>
       <Position25>
-        <Filename Value="main.pp"/>
-        <Caret Line="128" Column="69" TopLine="101"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="438" Column="63" TopLine="130"/>
       </Position25>
       <Position26>
-        <Filename Value="main.pp"/>
-        <Caret Line="40" Column="50" TopLine="26"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="480" Column="48" TopLine="128"/>
       </Position26>
       <Position27>
-        <Filename Value="main.pp"/>
-        <Caret Line="41" Column="8" TopLine="27"/>
+        <Filename Value="editortools.pp"/>
+        <Caret Line="481" Column="16" TopLine="457"/>
       </Position27>
       <Position28>
-        <Filename Value="main.pp"/>
-        <Caret Line="40" Column="50" TopLine="26"/>
+        <Filename Value="canvasfigures.pp"/>
+        <Caret Line="86" Column="9" TopLine="77"/>
       </Position28>
       <Position29>
-        <Filename Value="main.pp"/>
-        <Caret Line="41" Column="8" TopLine="27"/>
+        <Filename Value="canvasfigures.pp"/>
+        <Caret Line="288" TopLine="278"/>
       </Position29>
       <Position30>
-        <Filename Value="main.pp"/>
-        <Caret Line="76" Column="17" TopLine="69"/>
+        <Filename Value="canvasfigures.pp"/>
+        <Caret Line="295" Column="2" TopLine="277"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>

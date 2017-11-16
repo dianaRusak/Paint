@@ -36,6 +36,20 @@ TColorLineParam = class(TToolParam)
 	  function ToControl(AParentPanel: TPanel): TControl; override;
 end;
 
+{ TColorBrushParam }
+
+TColorBrushParam = class(TToolParam)
+	private
+	  fColorBrush: TColor;
+		fColorLine: TColor;
+	  procedure ChangeControl(Sender: TObject); override;
+	public
+	  property Value: TColor read fColorLine;
+	  constructor Create;
+	  function ToControl(AParentPanel: TPanel): TControl; override;
+end;
+
+
 { TFillStyleParam }
 
 TFillStyleParam = class(TToolParam)
@@ -91,8 +105,37 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 implementation
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TColorBrushParam
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{ TFillStyleParam }
+procedure TColorBrushParam.ChangeControl(Sender: TObject);
+begin
+  fColorBrush := (Sender as TColorBox).Selected;
+end;
+
+constructor TColorBrushParam.Create;
+begin
+  fName := 'Color of Brush';
+  fColorBrush := clBlack;
+end;
+
+function TColorBrushParam.ToControl(AParentPanel: TPanel): TControl;
+begin
+  Result := TColorBox.Create(AParentPanel);
+    with Result as TColorBox do
+    begin
+      Parent := AParentPanel;
+      ColorRectWidth := 10;
+      Style := [cbCustomColor, cbExtendedColors, cbPrettyNames, cbStandardColors];
+      Selected := fColorLine;
+      OnSelect := @ChangeControl;
+    end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TFillStyleParam
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function TFillStyleParam.fGetFillStyle: TBrushStyle;
 begin
@@ -149,7 +192,9 @@ begin
   end;
 end;
 
-{ TStyleLineParam }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TStyleLineParam
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 constructor TStyleLineParam.Create;
 begin
@@ -203,12 +248,14 @@ begin
    end;
 end;
 
-{ TWidthLineParam }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TWidthLineParam
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 constructor TWidthLineParam.Create;
 begin
   fName := 'Width of Line';
-  fWidthLine := 0;
+  fWidthLine := 1;
 end;
 
 function TWidthLineParam.ToControl(AParentPanel: TPanel): TControl;
@@ -216,9 +263,12 @@ begin
   Result := TTrackBar.Create(AParentPanel);
   with Result as TTrackBar do
   begin
+    OnChange := @ChangeControl;
     Parent := AParentPanel;
+    Min := 1;
+    Max := 20;
+    PageSize := 1;
     Position := fWidthLine;
-
   end;
 end;
 
@@ -228,7 +278,7 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//Color
+//ColorPen
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 constructor TColorLineParam.Create;
@@ -254,9 +304,5 @@ procedure TColorLineParam.ChangeControl(Sender: TObject);
 begin
   fColorLine := (Sender as TColorBox).Selected;
 end;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//Width
-
 
 end.

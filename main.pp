@@ -120,14 +120,17 @@ begin
   SetButton(Button);
 //TODO:
 
-  {with GetFigure(fCurrentFigureIndex) do begin
+{  with GetFigure(fCurrentFigureIndex) do begin
       Width := trkWidth.Position;
       PenStyle := cPenStylesTable[cmbPenStyle.ItemIndex].Style;
       PenColor := clrPenColor.Selected;
       BrushStyle := cBrushStylesTable[cmbBrushStyle.ItemIndex].Style;
       BrushColor := clrBrushColor.Selected;
     end;
-  }
+}
+
+  fCurrentToolClass.SetFigureParams(fCurrentFigureIndex);
+
   ToolBox.Enabled := False;
   miEdit.Enabled := False;
 
