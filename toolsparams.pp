@@ -106,10 +106,9 @@ end;
 TRadiusParam = class(TToolParam)
 	private
 		fRadius: integer;
-		fWidthLine: TWidth;
 	  procedure ChangeControl(Sender: TObject); override;
 	public
-	  property Value: TWidth read fWidthLine;
+	  property Value: integer read fRadius;
 	  constructor Create;
 	  function ToControl(AParentPanel: TPanel): TControl; override;
 end;
@@ -117,24 +116,6 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 implementation
-
-{ TRadiusParam }
-
-procedure TRadiusParam.ChangeControl(Sender: TObject);
-begin
-
-end;
-
-constructor TRadiusParam.Create;
-begin
-  fName := 'Radius';
-  fWidthLine := 1;
-end;
-
-function TRadiusParam.ToControl(AParentPanel: TPanel): TControl;
-begin
-
-end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TColorBrushParam
@@ -306,6 +287,34 @@ end;
 procedure TWidthLineParam.ChangeControl(Sender: TObject);
 begin
   fWidthLine := (Sender as TTrackBar).Position;
+end;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TRadiusParam
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+procedure TRadiusParam.ChangeControl(Sender: TObject);
+begin
+  fRadius := (Sender as TTrackBar).Position;
+end;
+
+constructor TRadiusParam.Create;
+begin
+  fName := 'Радиус';
+  fRadius := 1;
+end;
+
+function TRadiusParam.ToControl(AParentPanel: TPanel): TControl;
+begin
+  Result := TTrackBar.Create(AParentPanel);
+    with Result as TTrackBar do
+    begin
+      OnChange := @ChangeControl;
+      Parent := AParentPanel;
+      Min := 1;
+      Max := 50;
+      PageSize := 1;
+      Position := fRadius;
+    end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

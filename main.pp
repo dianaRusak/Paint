@@ -118,16 +118,6 @@ procedure TMainForm.PaintBoxMouseDown(Sender: TObject; Button: TMouseButton; Shi
 begin
   fCurrentFigureIndex := AddFigure(fCurrentToolClass.GetFigureClass());
   SetButton(Button);
-//TODO:
-
-{  with GetFigure(fCurrentFigureIndex) do begin
-      Width := trkWidth.Position;
-      PenStyle := cPenStylesTable[cmbPenStyle.ItemIndex].Style;
-      PenColor := clrPenColor.Selected;
-      BrushStyle := cBrushStylesTable[cmbBrushStyle.ItemIndex].Style;
-      BrushColor := clrBrushColor.Selected;
-    end;
-}
 
   fCurrentToolClass.SetFigureParams(fCurrentFigureIndex);
 
@@ -157,7 +147,6 @@ begin
       ToolBox.Enabled := True;
       miEdit.Enabled := True;
       PaintBox.Invalidate();
-
     end;
   end;
 end;

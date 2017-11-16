@@ -30,6 +30,7 @@ type
     fBrushStyle: TBrushStyle;
     fBrushColor: TColor;
     fTransparent: Boolean;
+    fRadius: integer;
   public
     function TopLeft():TFloatPoint;
     function BottomRight():TFloatPoint;
@@ -44,6 +45,7 @@ type
     property PenColor: TColor read fPenColor write fPenColor;
     property BrushStyle: TBrushStyle read fBrushStyle write fBrushStyle;
     property BrushColor: TColor read fBrushColor write fBrushColor;
+    property Radius: integer read fRadius write fRadius;
     property Transparent: Boolean read fTransparent write fTransparent;
   end;
 
@@ -52,20 +54,28 @@ type
     procedure Draw(aCanvas: TCanvas); override;
   end;
 
+	{ TFigureLine }
+
   TFigureLine = class(TCanvasFigure)
   public
     procedure Draw(aCanvas: TCanvas); override;
   end;
+
+	{ TFigurePolyline }
 
   TFigurePolyline = class(TCanvasFigure)
   public
     procedure Draw(aCanvas: TCanvas); override;
   end;
 
+	{ TFigureRectangle }
+
   TFigureRectangle = class(TCanvasFigure)
   public
     procedure Draw(aCanvas: TCanvas); override;
   end;
+
+	{ TFigureEllipse }
 
   TFigureEllipse = class(TCanvasFigure)
   public
@@ -79,13 +89,13 @@ type
     procedure Draw(aCanvas: TCanvas); override;
 	end;
 
-{	{ FFigureRoundRect }
+	{ TFigureRoundRect }
 
-  FFigureRoundRect = class(TCanvasFigure)
+  TFigureRoundRect = class(TCanvasFigure)
   public
     procedure Draw(aCanvas: TCanvas); override;
 	end;
-}
+
   TCanvasFigureClass = class of TCanvasFigure;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,6 +227,7 @@ begin
   aCanvas.Pen.Color := fPenColor;
   aCanvas.Brush.Style := fBrushStyle;
   aCanvas.Brush.Color := fBrushColor;
+  Radius := fRadius;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -276,16 +287,18 @@ begin
   aCanvas.Rectangle(cPoints[0].x, cPoints[0].y, cPoints[1].x, cPoints[1].y);
 end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//FFigureRoundRect
+//TFigureRoundRect
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{procedure FFigureRoundRect.Draw(aCanvas: TCanvas);
+procedure TFigureRoundRect.Draw(aCanvas: TCanvas);
+var
+  cPoints: TPointArray;
 begin
 	inherited;
   cPoints := GetCanvasPoints();
-  aCanvas.Rectangle(cPoints[0].x, cPoints[0].y, cPoints[1].x, cPoints[1].y);
+  aCanvas.RoundRect(cPoints[0].x, cPoints[0].y, cPoints[1].x, cPoints[1].y, Radius, Radius);
 end;
-}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TFigureEllipse
 ////////////////////////////////////////////////////////////////////////////////////////////////////

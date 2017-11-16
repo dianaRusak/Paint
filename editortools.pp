@@ -23,7 +23,8 @@ type
   // Finish() - Завершает рисование фигуры. Возвращает, удалось ли это сделать.
   // По умолчанию Update() и Finish() возвращают, не равен ли индекс константе cFigureIndexInvalid.
 
-	{ TEditorTool }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TEditorTool
 
   TEditorTool = class
   private
@@ -39,7 +40,8 @@ type
     class function Finish(aFigureIndex: SizeInt): Boolean; virtual;
   end;
 
-	{ TToolPen }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolPen
 
   TToolPen = class(TEditorTool)
   private
@@ -54,7 +56,8 @@ type
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
-	{ TToolLine }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolLine
 
   TToolLine = class(TEditorTool)
   private
@@ -67,10 +70,10 @@ type
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-
   end;
 
-	{ TToolPolyline }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolPolyline
 
   TToolPolyline = class(TEditorTool)
   private
@@ -85,7 +88,8 @@ type
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
-	{ TToolRectangle }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolRectangle
 
   TToolRectangle = class(TEditorTool)
   private
@@ -100,7 +104,24 @@ type
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
-	{ TToolEllipse }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolRounRect
+
+  TToolRounRect = class(TEditorTool)
+  private
+	  class var
+	    FParams: TToolParamsList;
+  class function GetParams: TToolParamsList; static; override;
+  public
+    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
+    class function GetName(): String; override;
+    class function GetFigureClass(): TCanvasFigureClass; override;
+    class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+  end;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolEllipse
 
   TToolEllipse = class(TEditorTool)
   private
@@ -115,7 +136,8 @@ type
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
-	{ TToolHand }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolHand
 
   TToolHand = class(TEditorTool)
   private
@@ -131,7 +153,8 @@ type
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
 	end;
 
-	{ TToolZoom }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolZoom
 
   TToolZoom = class(TEditorTool)
   private
@@ -147,7 +170,7 @@ type
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
 	end;
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
   TEditorToolClass = class of TEditorTool;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,9 +178,12 @@ type
 function GetEditorTool(aIndex: SizeInt): TEditorToolClass;
 function EditorToolsCount(): SizeInt;
 procedure SetButton(Button: TMouseButton);
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 implementation
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -167,6 +193,7 @@ type
 var
   EditorToolsClasses: TEditorToolsClassesArray;
   MBtn: TMouseButton;
+
 function GetEditorTool(aIndex: SizeInt): TEditorToolClass;
 begin
   Result := EditorToolsClasses[aIndex];
@@ -182,8 +209,9 @@ begin
   MBtn := Button;
 end;
 
-
-{ TToolZoom }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolZoom
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class function TToolZoom.GetParams: TToolParamsList;
 begin
@@ -223,8 +251,9 @@ class function TToolZoom.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := False;
 end;
-
-{ TToolHand }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolHand
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class function TToolHand.GetParams: TToolParamsList;
 begin
@@ -453,7 +482,8 @@ end;
 
 class function TToolRectangle.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
-  Result := inherited; if not Result then Exit;
+  Result := inherited;
+  if not Result then Exit;
   GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
 end;
 
@@ -461,6 +491,51 @@ class function TToolRectangle.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := False;
 end;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolRounRect
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class function TToolRounRect.GetParams: TToolParamsList;
+begin
+	Result := FParams;
+end;
+
+class procedure TToolRounRect.SetFigureParams(aFigureIndex: SizeInt);
+var
+  fFigure: TCanvasFigure;
+begin
+  fFigure := GetFigure(aFigureIndex);
+  fFigure.PenColor := (FParams[0] as TColorLineParam).Value;
+  fFigure.BrushColor := (FParams[1] as TColorBrushParam).Value;
+  fFigure.Width := (FParams[2] as TWidthLineParam).Value;
+  fFigure.PenStyle := (FParams[3] as TStyleLineParam).Value;
+  fFigure.BrushStyle := (FParams[4] as TFillStyleParam).Value;
+  fFigure.Radius := (FParams[5] as TRadiusParam).Value;
+end;
+
+class function TToolRounRect.GetName: String;
+begin
+  Result := 'Скруглённый прямоугольник';
+end;
+
+class function TToolRounRect.GetFigureClass: TCanvasFigureClass;
+begin
+  Result := TFigureRoundRect;
+end;
+
+class function TToolRounRect.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
+begin
+	Result := inherited;
+  if not Result then Exit;
+  GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
+end;
+
+class function TToolRounRect.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
+begin
+  Result := False;
+end;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TToolEllipse
@@ -518,6 +593,7 @@ initialization
     TToolLine,
     TToolPolyline,
     TToolRectangle,
+    TToolRounRect,
     TToolEllipse
   );
 
@@ -542,6 +618,14 @@ initialization
     TWidthLineParam.Create,
     TStyleLineParam.Create,
     TFillStyleParam.Create
+  );
+  TToolRounRect.FParams := TToolParamsList.Create(
+    TColorLineParam.Create,
+    TColorBrushParam.Create,
+    TWidthLineParam.Create,
+    TStyleLineParam.Create,
+    TFillStyleParam.Create,
+    TRadiusParam.Create
   );
   TToolEllipse.FParams := TToolParamsList.Create(
     TColorLineParam.Create,

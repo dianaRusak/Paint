@@ -2,9 +2,9 @@ object MainForm: TMainForm
   Left = 165
   Height = 487
   Top = 142
-  Width = 701
+  Width = 794
   ClientHeight = 467
-  ClientWidth = 701
+  ClientWidth = 794
   Constraints.MinHeight = 480
   Constraints.MinWidth = 640
   Menu = MainMenu
@@ -16,12 +16,12 @@ object MainForm: TMainForm
     Left = 0
     Height = 467
     Top = 0
-    Width = 128
+    Width = 144
     Align = alLeft
     BevelInner = bvRaised
     BevelOuter = bvNone
     ClientHeight = 467
-    ClientWidth = 128
+    ClientWidth = 144
     TabOrder = 0
     object lblTools: TLabel
       Left = 8
@@ -35,7 +35,7 @@ object MainForm: TMainForm
       Left = 8
       Height = 128
       Top = 24
-      Width = 107
+      Width = 136
       ExtendedSelect = False
       ItemHeight = 0
       OnSelectionChange = lstToolsSelectionChange
@@ -45,7 +45,7 @@ object MainForm: TMainForm
       Left = 0
       Height = 291
       Top = 176
-      Width = 128
+      Width = 144
       Anchors = [akTop, akLeft, akBottom]
       TabOrder = 1
     end
@@ -53,7 +53,7 @@ object MainForm: TMainForm
       Left = 8
       Height = 23
       Top = 153
-      Width = 107
+      Width = 139
       Increment = 1
       MaxValue = 1000
       MinValue = 1
@@ -69,10 +69,10 @@ object MainForm: TMainForm
     AnchorSideRight.Control = VerticalBar
     AnchorSideBottom.Control = HorizontalBar
     Cursor = crCross
-    Left = 128
+    Left = 144
     Height = 450
     Top = 0
-    Width = 552
+    Width = 629
     Anchors = [akTop, akLeft, akRight, akBottom]
     Color = clWhite
     ParentColor = False
@@ -89,10 +89,10 @@ object MainForm: TMainForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 128
+    Left = 144
     Height = 17
     Top = 450
-    Width = 552
+    Width = 629
     Anchors = [akLeft, akRight, akBottom]
     PageSize = 0
     TabOrder = 1
@@ -105,7 +105,7 @@ object MainForm: TMainForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = PaintBox
     AnchorSideBottom.Side = asrBottom
-    Left = 680
+    Left = 773
     Height = 450
     Top = 0
     Width = 21
