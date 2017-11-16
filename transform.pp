@@ -12,12 +12,14 @@ uses
 
 function ScreenToWorld (x, y:integer):TFloatPoint;
 function WorldToScreen (x, y:Extended):TPoint;
+procedure SetZoom (aZoom: double);
+procedure ZoomPoint(aPoint: TFloatPoint; aZoom:double);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var
-CanvasOffset: TFloatPoint;
+ScreenOffset: TFloatPoint;
 Zoom: Extended;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,14 +29,41 @@ implementation
 
 function ScreenToWorld(x, y: integer): TFloatPoint;
 begin
-  Result.x := x / Zoom + CanvasOffset.x;
-  Result.y := y / Zoom + CanvasOffset.y;
+  Result.x := x / Zoom + ScreenOffset.x;
+  Result.y := y / Zoom + ScreenOffset.y;
 end;
 
 function WorldToScreen(x, y: Extended): TPoint;
 begin
-  x := round((x - CanvasOffset.x) * Zoom);
-  y := round((y - CanvasOffset.y) * Zoom);
+  Result.x := round((x - ScreenOffset.x) * Zoom);
+  Result.y := round((y - ScreenOffset.y) * Zoom);
+end;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+procedure ZoomPoint(aPoint: TFloatPoint; aZoom:double);
+var
+  PrevZoom: double;
+  ScreenPos: Tpoint;
+begin
+  ScreenPos := WorldToScreen(aPoint.x, aPoint.y);
+  PrevZoom := Zoom;
+  SetZoom(aZoom);
+  if Zoom = PrevZoom then
+    exit;
+  ScreenOffset.x := aPoint.x - (ScreenPos.x / Zoom);
+  ScreenOffset.y := aPoint.y - (ScreenPos.y / Zoom);
+end;
+
+procedure SetZoom(aZoom: double);
+begin
+	if aZoom <= 0.01 then
+  	Zoom := 0.01
+	else if aZoom >= 100 then
+	  Zoom := 10
+	else
+  	Zoom := aZoom;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,5 +72,6 @@ end;
 initialization
 
 Zoom := 1;
+ScreenOffset := FloatPoint(0,0);
 
 end.

@@ -10,16 +10,20 @@ interface
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 uses
-  Classes, SysUtils, Graphics;
+  Classes, SysUtils, Graphics, GraphMath, math,
+  ToolsParams, Transform;
 
 const
   cFigureIndexInvalid = -1;
 
 type
+  TPointArray = array of TPoint;
+
+	{ TCanvasFigure }
 
   TCanvasFigure = class
   strict protected
-    fPoints: array of TPoint;
+    fPoints: array of TFloatPoint;
     fWidth: Integer;
     fPenStyle: TPenStyle;
     fPenColor: TColor;
@@ -27,9 +31,12 @@ type
     fBrushColor: TColor;
     fTransparent: Boolean;
   public
-    procedure AddPoint(aValue: TPoint);
-    function GetPoint(aIndex: SizeInt): TPoint;
-    procedure SetPoint(aIndex: SizeInt; aValue: TPoint);
+    function TopLeft():TFloatPoint;
+    function BottomRight():TFloatPoint;
+    procedure AddPoint(aValue: TFloatPoint);
+    function GetPoint(aIndex: SizeInt): TFloatPoint;
+    function GetCanvasPoints(): TPointArray;
+    procedure SetPoint(aIndex: SizeInt; aValue: TFloatPoint);
     function PointsCount(): SizeInt;
     procedure Draw(aCanvas: TCanvas); virtual;
     property Width: Integer read fWidth write fWidth;
@@ -64,6 +71,13 @@ type
   public
     procedure Draw(aCanvas: TCanvas); override;
   end;
+
+	{ FFigureEmpty }
+
+  FFigureEmpty = class(TCanvasFigure)
+  public
+      procedure Draw(aCanvas: TCanvas); override;
+	end;
 
   TCanvasFigureClass = class of TCanvasFigure;
 
@@ -115,7 +129,10 @@ end;
 
 function GetFigure(aIndex: SizeInt): TCanvasFigure;
 begin
-  Result := FiguresData[aIndex];
+  if Length(FiguresData) = 0 then
+    Result := nil
+  else
+    Result := FiguresData[aIndex];
 end;
 
 function FiguresCount(): SizeInt;
@@ -127,7 +144,31 @@ end;
 // TCanvasFigure
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-procedure TCanvasFigure.AddPoint(aValue: TPoint);
+function TCanvasFigure.TopLeft: TFloatPoint;
+var
+  i: TFloatPoint;
+begin
+  Result := fPoints[0];
+  for i in fPoints do
+    begin
+      Result.x := min (Result.x, i.x);
+      Result.y := min (Result.y, i.y);
+		end;
+end;
+
+function TCanvasFigure.BottomRight: TFloatPoint;
+var
+  i: TFloatPoint;
+begin
+  Result := fPoints[0];
+  for i in fPoints do
+    begin
+      Result.x := max (Result.x, i.x);
+      Result.y := max (Result.y, i.y);
+		end;
+end;
+
+procedure TCanvasFigure.AddPoint(aValue: TFloatPoint);
 var
   Len: SizeInt;
 begin
@@ -136,12 +177,23 @@ begin
   fPoints[Len] := aValue;
 end;
 
-function TCanvasFigure.GetPoint(aIndex: SizeInt): TPoint;
+function TCanvasFigure.GetPoint(aIndex: SizeInt): TFloatPoint;
 begin
   Result := fPoints[aIndex];
 end;
 
-procedure TCanvasFigure.SetPoint(aIndex: SizeInt; aValue: TPoint);
+function TCanvasFigure.GetCanvasPoints: TPointArray;
+var
+  CanvasPoints: TPointArray;
+  i: integer;
+begin
+  SetLength(CanvasPoints, Length(fPoints));
+  for i := 0 to Length(fPoints)-1 do
+    CanvasPoints[i] := WorldToScreen(fPoints[i].x, fPoints[i].y);
+  Result := CanvasPoints;
+end;
+
+procedure TCanvasFigure.SetPoint(aIndex: SizeInt; aValue: TFloatPoint);
 begin
   fPoints[aIndex] := aValue;
 end;
@@ -157,7 +209,7 @@ begin
   aCanvas.Pen.Style := fPenStyle;
   aCanvas.Pen.Color := fPenColor;
   aCanvas.Brush.Style := fBrushStyle;
- if fBrushStyle <> bsClear then
+  if fBrushStyle <> bsClear then
     aCanvas.Brush.Color := fBrushColor;
 end;
 
@@ -166,16 +218,26 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 procedure TFigurePen.Draw(aCanvas: TCanvas);
-var
-  LastPoint: SizeInt;
+{var
+  LastPoint: SizeInt;}
 begin
   inherited;
-  aCanvas.Polyline(fPoints);
+  aCanvas.Polyline(GetCanvasPoints());
+
   // TCanvas.Polyline() рисует линию вплоть до точки, но не включая её,
   // поэтому последнюю точку рисуем отдельно.
-  LastPoint := High(fPoints);
+  {LastPoint := High(fPoints);
   if LastPoint > 0 then
-    aCanvas.Pixels[fPoints[LastPoint].x, fPoints[LastPoint].y] := fPenColor;
+    aCanvas.Pixels[fPoints[LastPoint].x, fPoints[LastPoint].y] := fPenColor;}
+end;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//FFigureEmpty
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+procedure FFigureEmpty.Draw(aCanvas: TCanvas);
+begin
+
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,9 +245,12 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 procedure TFigureLine.Draw(aCanvas: TCanvas);
+var
+  cPoints: TPointArray;
 begin
   inherited;
-  aCanvas.Line(fPoints[0].x, fPoints[0].y, fPoints[1].x, fPoints[1].y);
+  cPoints := GetCanvasPoints();
+  aCanvas.Line(cPoints[0].x, cPoints[0].y, cPoints[1].x, cPoints[1].y);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +260,7 @@ end;
 procedure TFigurePolyline.Draw(aCanvas: TCanvas);
 begin
   inherited;
-  aCanvas.Polyline(fPoints);
+  aCanvas.Polyline(GetCanvasPoints());
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -203,9 +268,12 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 procedure TFigureRectangle.Draw(aCanvas: TCanvas);
+var
+  cPoints: TPointArray;
 begin
   inherited;
-  aCanvas.Rectangle(fPoints[0].x, fPoints[0].y, fPoints[1].x, fPoints[1].y);
+  cPoints := GetCanvasPoints();
+  aCanvas.Rectangle(cPoints[0].x, cPoints[0].y, cPoints[1].x, cPoints[1].y);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,9 +281,12 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 procedure TFigureEllipse.Draw(aCanvas: TCanvas);
+var
+  cPoints: TPointArray;
 begin
   inherited;
-  aCanvas.Ellipse(fPoints[0].x, fPoints[0].y, fPoints[1].x, fPoints[1].y);
+  cPoints := GetCanvasPoints();
+  aCanvas.Ellipse(cPoints[0].x, cPoints[0].y, cPoints[1].x, cPoints[1].y);
 end;
 
 end.

@@ -2,7 +2,6 @@ unit EditorTools;
 
 {$MODE OBJFPC}
 {$LONGSTRINGS ON}
-{$STATIC ON}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -11,7 +10,7 @@ interface
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 uses
-  Classes, SysUtils, Graphics,
+  Classes, SysUtils, Graphics, Transform, Controls,
   CanvasFigures, ToolsParams;
 
 const
@@ -109,6 +108,8 @@ type
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
+	{ TToolRectangle }
+
   TToolRectangle = class(TEditorTool)
   private
 	  class var
@@ -120,6 +121,8 @@ type
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
+
+	{ TToolEllipse }
 
   TToolEllipse = class(TEditorTool)
   private
@@ -133,13 +136,44 @@ type
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
+	{ TToolHand }
+
+  TToolHand = class(TEditorTool)
+  private
+    class var
+      FCanDraw: boolean;
+    class function GetParams: TToolParamsList; static; override;
+  public
+    class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
+    class function GetName(): String; override;
+    class function GetFigureClass(): TCanvasFigureClass; override;
+    class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+	end;
+
+	{ TToolZoom }
+
+  TToolZoom = class(TEditorTool)
+  private
+    class var
+      FCanDraw: boolean;
+    class function GetParams: TToolParamsList; static; override;
+  public
+    class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
+    class function GetName(): String; override;
+    class function GetFigureClass(): TCanvasFigureClass; override;
+    class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+	end;
+
+
   TEditorToolClass = class of TEditorTool;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function GetEditorTool(aIndex: SizeInt): TEditorToolClass;
 function EditorToolsCount(): SizeInt;
-
+procedure SetButton(Button: TMouseButton);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 implementation
@@ -151,7 +185,7 @@ type
 
 var
   EditorToolsClasses: TEditorToolsClassesArray;
-
+  MBtn: TMouseButton;
 function GetEditorTool(aIndex: SizeInt): TEditorToolClass;
 begin
   Result := EditorToolsClasses[aIndex];
@@ -160,6 +194,87 @@ end;
 function EditorToolsCount(): SizeInt;
 begin
   Result := Length(EditorToolsClasses);
+end;
+
+procedure SetButton(Button: TMouseButton);
+begin
+  MBtn := Button;
+end;
+
+
+{ TToolZoom }
+
+class function TToolZoom.GetParams: TToolParamsList;
+begin
+	Result:=inherited GetParams;
+end;
+
+class procedure TToolZoom.Start(aFigureIndex: SizeInt; aXY: TPoint);
+begin
+	inherited Start(aFigureIndex, aXY);
+  if MBtn = mbLeft then
+    ZoomPoint(ScreenToWorld(aXY.x, aXY.y), Zoom*2)
+  else if MBtn = mbRight then
+    ZoomPoint(ScreenToWorld(aXY.x, aXY.y), Zoom/2);
+end;
+
+class function TToolZoom.GetName: String;
+begin
+  Result := 'Зуууууууум';
+end;
+
+class function TToolZoom.GetFigureClass: TCanvasFigureClass;
+begin
+  Result := FFigureEmpty;
+end;
+
+class function TToolZoom.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
+begin
+	Result:= False;
+end;
+
+class function TToolZoom.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
+begin
+  Result := False;
+end;
+
+{ TToolHand }
+
+class function TToolHand.GetParams: TToolParamsList;
+begin
+	Result:=inherited GetParams;
+end;
+
+class procedure TToolHand.Start(aFigureIndex: SizeInt; aXY: TPoint);
+begin
+	inherited Start(aFigureIndex, aXY);
+  FCanDraw := true;
+end;
+
+class function TToolHand.GetName: String;
+begin
+  Result := 'Лапка';
+end;
+
+class function TToolHand.GetFigureClass: TCanvasFigureClass;
+begin
+  Result := FFigureEmpty;
+end;
+
+class function TToolHand.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
+begin
+  if not FCanDraw then exit(false);
+	Result := true;
+  ScreenOffset.x := ScreenOffset.x + GetFigure(aFigureIndex).GetPoint(0).x
+    - ScreenToWorld(aXY.x, aXY.y).x;
+  ScreenOffset.y := ScreenOffset.y + GetFigure(aFigureIndex).GetPoint(0).y
+    - ScreenToWorld(aXY.x, aXY.y).y;
+end;
+
+class function TToolHand.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
+begin
+  Result := False;
+  FCanDraw := false;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,8 +289,8 @@ end;
 class procedure TEditorTool.Start(aFigureIndex: SizeInt; aXY: TPoint);
 begin
   with GetFigure(aFigureIndex) do begin
-    AddPoint(aXY);
-    AddPoint(aXY);
+    AddPoint(ScreenToWorld(aXY.x, aXY.y));
+    AddPoint(ScreenToWorld(aXY.x, aXY.y));
   end;
 end;
 
@@ -211,7 +326,7 @@ end;
 class function TToolPen.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := inherited; if not Result then Exit;
-  GetFigure(aFigureIndex).AddPoint(aXY);
+  GetFigure(aFigureIndex).AddPoint(ScreenToWorld(aXY.x, aXY.y));
 end;
 
 class function TToolPen.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
@@ -241,7 +356,7 @@ end;
 class function TToolLine.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := inherited; if not Result then Exit;
-  GetFigure(aFigureIndex).SetPoint(1, aXY);
+  GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
 end;
 
 class function TToolLine.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
@@ -274,14 +389,14 @@ var
 begin
   Result := inherited; if not Result then Exit;
   Figure := GetFigure(aFigureIndex);
-  Figure.SetPoint(Figure.PointsCount()-1, aXY);
+  Figure.SetPoint(Figure.PointsCount()-1, ScreenToWorld(aXY.x, aXY.y));
 end;
 
 class function TToolPolyline.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := aFigureIndex <> cFigureIndexInvalid;
   if not Result then Exit;
-  GetFigure(aFigureIndex).AddPoint(aXY);
+  GetFigure(aFigureIndex).AddPoint(ScreenToWorld(aXY.x, aXY.y));
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -306,7 +421,7 @@ end;
 class function TToolRectangle.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := inherited; if not Result then Exit;
-  GetFigure(aFigureIndex).SetPoint(1, aXY);
+  GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
 end;
 
 class function TToolRectangle.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
@@ -336,7 +451,8 @@ end;
 class function TToolEllipse.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := inherited; if not Result then Exit;
-  GetFigure(aFigureIndex).SetPoint(1, aXY);
+  GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
+
 end;
 
 class function TToolEllipse.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
@@ -351,6 +467,8 @@ initialization
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   EditorToolsClasses := TEditorToolsClassesArray.Create(
+    TToolHand,
+    TToolZoom,
     TToolPen,
     TToolLine,
     TToolPolyline,
