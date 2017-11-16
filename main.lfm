@@ -1,9 +1,9 @@
 object MainForm: TMainForm
-  Left = 357
-  Height = 480
-  Top = 124
+  Left = -2
+  Height = 487
+  Top = 160
   Width = 701
-  ClientHeight = 460
+  ClientHeight = 467
   ClientWidth = 701
   Constraints.MinHeight = 480
   Constraints.MinWidth = 640
@@ -14,13 +14,13 @@ object MainForm: TMainForm
   Visible = True
   object ToolBox: TPanel
     Left = 0
-    Height = 460
+    Height = 467
     Top = 0
     Width = 128
     Align = alLeft
     BevelInner = bvRaised
     BevelOuter = bvNone
-    ClientHeight = 460
+    ClientHeight = 467
     ClientWidth = 128
     TabOrder = 0
     object lblTools: TLabel
@@ -41,113 +41,38 @@ object MainForm: TMainForm
       OnSelectionChange = lstToolsSelectionChange
       TabOrder = 0
     end
-    object lblPenColor: TLabel
-      Left = 8
-      Height = 15
-      Top = 160
-      Width = 67
-      Caption = 'Цвет линии:'
-      ParentColor = False
-    end
-    object clrPenColor: TColorBox
-      Left = 8
-      Height = 22
-      Top = 176
-      Width = 107
-      ColorRectWidth = 8
-      Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames]
-      AutoComplete = True
-      AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
-      ItemHeight = 16
-      TabOrder = 1
-    end
-    object lblPenStyle: TLabel
-      Left = 8
-      Height = 15
-      Top = 200
-      Width = 74
-      Caption = 'Стиль линии:'
-      ParentColor = False
-    end
-    object cmbPenStyle: TComboBox
-      Left = 8
-      Height = 23
-      Top = 216
-      Width = 107
-      ItemHeight = 15
-      Style = csDropDownList
-      TabOrder = 2
-    end
-    object lblWidth: TLabel
-      Left = 8
-      Height = 15
-      Top = 240
-      Width = 93
-      Caption = 'Толщина линии:'
-      ParentColor = False
-    end
-    object trkWidth: TTrackBar
-      Left = 8
-      Height = 22
-      Top = 264
-      Width = 107
-      Max = 16
-      Min = 1
-      Position = 1
-      TabOrder = 3
-    end
-    object lblBrushColor: TLabel
-      Left = 8
-      Height = 15
-      Top = 288
-      Width = 76
-      Caption = 'Цвет заливки:'
-      ParentColor = False
-    end
-    object clrBrushColor: TColorBox
-      Left = 8
-      Height = 22
-      Top = 304
-      Width = 107
-      ColorRectWidth = 8
-      DefaultColorColor = clWhite
-      Selected = clWhite
-      Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames]
-      ItemHeight = 16
-      TabOrder = 4
-    end
-    object lblBrushStyle: TLabel
-      Left = 8
-      Height = 15
-      Top = 328
-      Width = 83
-      Caption = 'Стиль заливки:'
-      ParentColor = False
-    end
-    object cmbBrushStyle: TComboBox
-      Left = 8
-      Height = 23
-      Top = 344
-      Width = 107
-      ItemHeight = 15
-      Style = csDropDownList
-      TabOrder = 5
-    end
     object ToolParamsPanel: TPanel
       Left = 0
-      Height = 298
-      Top = 160
+      Height = 291
+      Top = 176
       Width = 128
-      TabOrder = 6
-      OnMouseDown = ToolParamsPanelMouseDown
+      Anchors = [akTop, akLeft, akBottom]
+      TabOrder = 1
+    end
+    object spnZoom: TFloatSpinEdit
+      Left = 8
+      Height = 23
+      Top = 153
+      Width = 107
+      Increment = 1
+      MaxValue = 1000
+      MinValue = 1
+      OnChange = spnZoomChange
+      TabOrder = 2
+      Value = 1
     end
   end
   object PaintBox: TPaintBox
+    AnchorSideLeft.Control = ToolBox
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = VerticalBar
+    AnchorSideBottom.Control = HorizontalBar
     Cursor = crCross
     Left = 128
-    Height = 460
+    Height = 450
     Top = 0
-    Width = 573
+    Width = 552
     Anchors = [akTop, akLeft, akRight, akBottom]
     Color = clWhite
     ParentColor = False
@@ -155,6 +80,40 @@ object MainForm: TMainForm
     OnMouseMove = PaintBoxMouseMove
     OnMouseUp = PaintBoxMouseUp
     OnPaint = PaintBoxPaint
+  end
+  object HorizontalBar: TScrollBar
+    AnchorSideLeft.Control = PaintBox
+    AnchorSideTop.Control = PaintBox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = PaintBox
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 128
+    Height = 17
+    Top = 450
+    Width = 552
+    Anchors = [akLeft, akRight, akBottom]
+    PageSize = 0
+    TabOrder = 1
+    OnScroll = HorizontalBarScroll
+  end
+  object VerticalBar: TScrollBar
+    AnchorSideLeft.Side = asrCenter
+    AnchorSideTop.Control = PaintBox
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = PaintBox
+    AnchorSideBottom.Side = asrBottom
+    Left = 680
+    Height = 450
+    Top = 0
+    Width = 21
+    Anchors = [akTop, akRight, akBottom]
+    Kind = sbVertical
+    PageSize = 0
+    TabOrder = 2
+    OnScroll = VerticalBarScroll
   end
   object MainMenu: TMainMenu
     left = 544
