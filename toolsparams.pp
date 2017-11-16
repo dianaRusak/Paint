@@ -41,10 +41,9 @@ end;
 TColorBrushParam = class(TToolParam)
 	private
 	  fColorBrush: TColor;
-		fColorLine: TColor;
 	  procedure ChangeControl(Sender: TObject); override;
 	public
-	  property Value: TColor read fColorLine;
+	  property Value: TColor read fColorBrush;
 	  constructor Create;
 	  function ToControl(AParentPanel: TPanel): TControl; override;
 end;
@@ -102,9 +101,41 @@ TStyleLineParam = class(TToolParam)
 	  function ToControl(AParentPanel: TPanel): TControl; override;
 end;
 
+{ TRadiusParam }
+
+TRadiusParam = class(TToolParam)
+	private
+		fRadius: integer;
+		fWidthLine: TWidth;
+	  procedure ChangeControl(Sender: TObject); override;
+	public
+	  property Value: TWidth read fWidthLine;
+	  constructor Create;
+	  function ToControl(AParentPanel: TPanel): TControl; override;
+end;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 implementation
+
+{ TRadiusParam }
+
+procedure TRadiusParam.ChangeControl(Sender: TObject);
+begin
+
+end;
+
+constructor TRadiusParam.Create;
+begin
+  fName := 'Radius';
+  fWidthLine := 1;
+end;
+
+function TRadiusParam.ToControl(AParentPanel: TPanel): TControl;
+begin
+
+end;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TColorBrushParam
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +159,7 @@ begin
       Parent := AParentPanel;
       ColorRectWidth := 10;
       Style := [cbCustomColor, cbExtendedColors, cbPrettyNames, cbStandardColors];
-      Selected := fColorLine;
+      Selected := fColorBrush;
       OnSelect := @ChangeControl;
     end;
 end;

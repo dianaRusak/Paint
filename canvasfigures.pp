@@ -216,8 +216,7 @@ begin
   aCanvas.Pen.Style := fPenStyle;
   aCanvas.Pen.Color := fPenColor;
   aCanvas.Brush.Style := fBrushStyle;
-  if fBrushStyle <> bsClear then
-    aCanvas.Brush.Color := fBrushColor;
+  aCanvas.Brush.Color := fBrushColor;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,12 +229,6 @@ procedure TFigurePen.Draw(aCanvas: TCanvas);
 begin
   inherited;
   aCanvas.Polyline(GetCanvasPoints());
-
-  // TCanvas.Polyline() рисует линию вплоть до точки, но не включая её,
-  // поэтому последнюю точку рисуем отдельно.
-  {LastPoint := High(fPoints);
-  if LastPoint > 0 then
-    aCanvas.Pixels[fPoints[LastPoint].x, fPoints[LastPoint].y] := fPenColor;}
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
