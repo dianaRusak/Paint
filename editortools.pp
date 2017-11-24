@@ -140,10 +140,8 @@ type
 //TToolHand
 
   TToolHand = class(TEditorTool)
-  private
-    class var
-      FCanDraw: boolean;
-    class function GetParams: TToolParamsList; static; override;
+  class var
+    FCanDraw: Boolean;
   public
     class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
@@ -151,16 +149,13 @@ type
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+    class function Finish(aFigureIndex: SizeInt): Boolean;override;
 	end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TToolZoom
 
   TToolZoom = class(TEditorTool)
-  private
-    class var
-      FCanDraw: boolean;
-    class function GetParams: TToolParamsList; static; override;
   public
     class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
@@ -168,6 +163,24 @@ type
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
     class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+    class function Finish(aFigureIndex: SizeInt): Boolean;override;
+	end;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolAllocator
+
+  TToolAllocator = class(TEditorTool)
+  private
+    class var
+      FParams: TToolParamsList;
+    class function GetParams: TToolParamsList; static; override;
+  public
+    class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
+    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
+    class function GetName(): String; override;
+    class function GetFigureClass(): TCanvasFigureClass; override;
+    class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+    class function Finish(aFigureIndex: SizeInt): Boolean; override;
 	end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,6 +191,7 @@ type
 function GetEditorTool(aIndex: SizeInt): TEditorToolClass;
 function EditorToolsCount(): SizeInt;
 procedure SetButton(Button: TMouseButton);
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,14 +223,55 @@ begin
   MBtn := Button;
 end;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//TToolZoom
-////////////////////////////////////////////////////////////////////////////////////////////////////
+{ TToolAllocator }
 
-class function TToolZoom.GetParams: TToolParamsList;
+class function TToolAllocator.GetParams: TToolParamsList;
 begin
 	Result:=inherited GetParams;
 end;
+
+class procedure TToolAllocator.Start(aFigureIndex: SizeInt; aXY: TPoint);
+begin
+	inherited Start(aFigureIndex, aXY);
+end;
+
+class procedure TToolAllocator.SetFigureParams(aFigureIndex: SizeInt);
+begin
+
+end;
+
+class function TToolAllocator.GetName: String;
+begin
+  Result := 'Выделитель';
+end;
+
+class function TToolAllocator.GetFigureClass: TCanvasFigureClass;
+begin
+  Result := FFigureAllotment;
+end;
+
+class function TToolAllocator.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
+begin
+	Result := inherited;
+  if not Result then Exit;
+  GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
+end;
+
+class function TToolAllocator.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
+begin
+  Result := False;
+end;
+
+class function TToolAllocator.Finish(aFigureIndex: SizeInt): Boolean;
+begin
+  Result := aFigureIndex <> cFigureIndexInvalid;
+  DeleteFigure(aFigureIndex);
+end;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//TToolZoom
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class procedure TToolZoom.SetFigureParams(aFigureIndex: SizeInt);
 begin
@@ -251,14 +306,15 @@ class function TToolZoom.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := False;
 end;
+
+class function TToolZoom.Finish(aFigureIndex: SizeInt): Boolean;
+begin
+
+end;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TToolHand
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class function TToolHand.GetParams: TToolParamsList;
-begin
-	Result:=inherited GetParams;
-end;
 
 class procedure TToolHand.SetFigureParams(aFigureIndex: SizeInt);
 begin
@@ -295,6 +351,11 @@ class function TToolHand.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := False;
   FCanDraw := false;
+end;
+
+class function TToolHand.Finish(aFigureIndex: SizeInt): Boolean;
+begin
+
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -572,7 +633,6 @@ class function TToolEllipse.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := inherited; if not Result then Exit;
   GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
-
 end;
 
 class function TToolEllipse.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
@@ -591,23 +651,24 @@ initialization
     TToolZoom,
     TToolPen,
     TToolLine,
-    TToolPolyline,
     TToolRectangle,
     TToolRounRect,
-    TToolEllipse
+    TToolEllipse,
+    TToolAllocator,
+    TToolPolyline
   );
 
+  TToolPolyline.FParams := TToolParamsList.Create(
+    TColorLineParam.Create,
+    TWidthLineParam.Create,
+    TStyleLineParam.Create
+  );
   TToolLine.FParams := TToolParamsList.Create(
     TColorLineParam.Create,
     TWidthLineParam.Create,
     TStyleLineParam.Create
   );
   TToolPen.FParams := TToolParamsList.Create(
-    TColorLineParam.Create,
-    TWidthLineParam.Create,
-    TStyleLineParam.Create
-  );
-  TToolPolyline.FParams := TToolParamsList.Create(
     TColorLineParam.Create,
     TWidthLineParam.Create,
     TStyleLineParam.Create

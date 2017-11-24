@@ -11,15 +11,18 @@ interface
 
 uses
   Classes, SysUtils, Graphics, GraphMath, math,
-  Forms, Dialogs, Menus, Buttons, ColorBox,
-  Controls, ExtCtrls, StdCtrls, ComCtrls, Spin,
-  EditorTools, ToolsParams, Transform;
+  Forms, Dialogs, Menus, Buttons,
+  Controls, ExtCtrls, StdCtrls, Spin,
+  EditorTools, ToolsParams, Transform, CanvasFigures;
 
 type
 
   { TMainForm }
 
   TMainForm = class(TForm)
+		Deselect: TMenuItem;
+		DeleteBtn: TMenuItem;
+		SelectAll: TMenuItem;
 		spnZoom: TFloatSpinEdit;
 		HorizontalBar: TScrollBar;
 		VerticalBar: TScrollBar;
@@ -36,18 +39,19 @@ type
     miHelp: TMenuItem;
     miAbout: TMenuItem;
 
-		procedure spnZoomChange(Sender: TObject);
+		procedure DeleteBtnClick(Sender: TObject);
+	  procedure DeselectClick(Sender: TObject);
+		procedure SelectAllClick(Sender: TObject);
+	  procedure spnZoomChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
 		procedure HorizontalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
 			var ScrollPos: Integer);
-
     procedure PaintBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer);
     procedure PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure PaintBoxMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer);
     procedure PaintBoxPaint(Sender: TObject);
-
     procedure lstToolsSelectionChange(Sender: TObject; User: boolean);
     procedure miClearImageClick(Sender: TObject);
     procedure miAboutClick(Sender: TObject);
@@ -55,6 +59,7 @@ type
     procedure SetScrollBar();
 		procedure VerticalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
 			var ScrollPos: Integer);
+
   strict private
     fCurrentToolClass: TEditorToolClass;
     fCurrentFigureIndex: SizeInt;
@@ -72,8 +77,6 @@ implementation
 
 {$R *.lfm}
 
-uses
-  CanvasFigures;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TMainForm
@@ -104,6 +107,37 @@ begin
   Invalidate();
 end;
 
+procedure TMainForm.DeselectClick(Sender: TObject);
+var
+  i: SizeInt;
+begin
+  for i:= 0 to FiguresCount()-1 do
+  begin
+    GetFigure(i).selected := False;
+    Invalidate;
+	end;
+  UnSelectAll();
+end;
+
+procedure TMainForm.SelectAllClick(Sender: TObject);
+var
+  i: SizeInt;
+begin
+  for i := 0 to FiguresCount() - 1 do
+  begin
+    GetFigure(i).selected := True;
+    Invalidate();
+	end;
+  PSelectAll();
+end;
+
+procedure TMainForm.DeleteBtnClick(Sender: TObject);
+begin
+  DeleteSelected();
+  Invalidate();
+  UnSelectAll();
+end;
+
 procedure TMainForm.HorizontalBarScroll(Sender: TObject;
 	ScrollCode: TScrollCode; var ScrollPos: Integer);
 begin
@@ -115,10 +149,14 @@ end;
 
 procedure TMainForm.PaintBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
   X, Y: Integer);
+
 begin
-  fCurrentFigureIndex := AddFigure(fCurrentToolClass.GetFigureClass());
   SetButton(Button);
 
+  if fCurrentToolClass = nil then
+    exit;
+  begin
+  fCurrentFigureIndex := AddFigure(fCurrentToolClass.GetFigureClass());
   fCurrentToolClass.SetFigureParams(fCurrentFigureIndex);
 
   ToolBox.Enabled := False;
@@ -129,8 +167,12 @@ begin
   SetScrollBar();
 end;
 
+end;
+
 procedure TMainForm.PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
+  if fCurrentToolClass = nil then
+    exit;
   if fCurrentToolClass.Update(fCurrentFigureIndex, Point(X, Y)) then
     PaintBox.Invalidate();
   SetScrollBar();
@@ -139,8 +181,11 @@ end;
 procedure TMainForm.PaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
+  if fCurrentToolClass = nil then
+    exit;
+
   if (not fCurrentToolClass.Step(fCurrentFigureIndex, Point(X, Y))) or
-     (Button = mbRight) then
+  (Button = mbRight) then
   begin
     if fCurrentToolClass.Finish(fCurrentFigureIndex) then begin
       fCurrentFigureIndex := cFigureIndexInvalid;
@@ -149,6 +194,7 @@ begin
       PaintBox.Invalidate();
     end;
   end;
+  beginingRun := true;
 end;
 
 procedure TMainForm.PaintBoxPaint(Sender: TObject);
@@ -159,6 +205,8 @@ begin
   PaintBox.Canvas.Clear();
   for i := 0 to FiguresCount()-1 do
     GetFigure(i).Draw(PaintBox.Canvas);
+  for i := 0 to FiguresCount()-1 do
+    GetFigure(i).DrawSelection(PaintBox.Canvas);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
