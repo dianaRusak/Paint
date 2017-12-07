@@ -5,13 +5,9 @@ unit ToolsParams;
 interface
 
 uses
-   Classes, SysUtils,Graphics, Dialogs, Controls, ComCtrls, Spin, StdCtrls, ColorBox, ExtCtrls;
+   Classes, SysUtils,Graphics, Controls, ComCtrls, StdCtrls, ColorBox, ExtCtrls;
 
 type
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//TParamOpen
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TToolParam = class
 	private
@@ -24,7 +20,7 @@ end;
 
 TToolParamsList = array of TToolParam;
 
-	{ TColorLineParam }
+{TColorLineParam }
 
 TColorLineParam = class(TToolParam)
 	private
@@ -60,7 +56,6 @@ TFillStyleParam = class(TToolParam)
 	 procedure ChangeControl(Sender: TObject); override;
 	 procedure fDrawItem(Control: TWinControl; Index: Integer; ARect: TRect;
 	   State: TOwnerDrawState);
-
   public
 	  property Value: TBrushStyle read fGetFillStyle;
 	  constructor Create;
@@ -166,20 +161,18 @@ begin
     begin
       FillRect(ARect);
       Pen.Color := clBlack;
-      Pen.Style := psSolid;
+      Pen.Style := psClear;
       Pen.Width := 1;
       Brush.Style := FFillStyles[Index];
-      if Index <> 1 then
-        Brush.Color := clBlack;
-      Rectangle(ARect.Left + 1, ARect.Top + 1, ARect.Right - 1,
-        ARect.Bottom - 1);
+      if Brush.Style <> bsClear then
+        Brush.Color := clPurple;
+      Rectangle(ARect.Left + 1, ARect.Top + 1, ARect.Right - 1,ARect.Bottom - 1);
     end;
 end;
 
 constructor TFillStyleParam.Create;
 begin
   FName := 'Fill style';
-  FFillIndex := 1;
 end;
 
 function TFillStyleParam.ToControl(AParentPanel: TPanel): TControl;
@@ -211,7 +204,6 @@ end;
 constructor TStyleLineParam.Create;
 begin
   fName := 'Style of Line';
-  //fStyleLine := psSolid;
 end;
 
 function TStyleLineParam.ToControl(AParentPanel: TPanel): TControl;
@@ -300,7 +292,7 @@ end;
 constructor TRadiusParam.Create;
 begin
   fName := 'Радиус';
-  fRadius := 1;
+  fRadius := 5;
 end;
 
 function TRadiusParam.ToControl(AParentPanel: TPanel): TControl;
@@ -310,7 +302,7 @@ begin
     begin
       OnChange := @ChangeControl;
       Parent := AParentPanel;
-      Min := 1;
+      Min := 5;
       Max := 50;
       PageSize := 1;
       Position := fRadius;

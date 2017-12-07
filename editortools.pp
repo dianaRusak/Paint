@@ -10,34 +10,33 @@ interface
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 uses
-  Classes, SysUtils, Graphics, Transform, Controls,
+  Classes, SysUtils, Graphics, Transform, Controls, GraphMath,
   CanvasFigures, ToolsParams;
 
 type
 
-  // GetName() - Возвращает название инструмента.
-  // GetFigureClass() - Возвращает класс фигуры, рисуемый данным инструментом.
-  // Start() - Инициализирует уже созданную фигуру по её индексу.
-  // Update() - Обновляет положение инструмента. Возвращает, удалось ли это сделать.
-  // Step() - Указывает, что часть фигуры нарисована. Возвращает, надо ли продолжать рисование.
-  // Finish() - Завершает рисование фигуры. Возвращает, удалось ли это сделать.
-  // По умолчанию Update() и Finish() возвращают, не равен ли индекс константе cFigureIndexInvalid.
+  TFloatPointArray = array of TFloatPoint;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TEditorTool
 
   TEditorTool = class
   private
-    class function GetParams: TToolParamsList; static; virtual;
+	  class function GetParams: TToolParamsList; static; virtual;
   public
 		class procedure SetFigureParams (aFigureIndex: SizeInt); virtual; abstract;
 		class property Params: TToolParamsList read GetParams;
+    // GetName() - Возвращает название инструмента.
     class function GetName(): String; virtual; abstract;
+    // GetFigureClass() - Возвращает класс фигуры, рисуемый данным инструментом.
     class function GetFigureClass(): TCanvasFigureClass; virtual; abstract;
+    // Start() - Инициализирует уже созданную фигуру по её индексу.
     class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); virtual;
+    // Update() - Обновляет положение инструмента. Возвращает, удалось ли это сделать.
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; virtual;
-    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; virtual; abstract;
+    // Finish() - Завершает рисование фигуры. Возвращает, удалось ли это сделать.
     class function Finish(aFigureIndex: SizeInt): Boolean; virtual;
+    // По умолчанию Update() и Finish() возвращают, не равен ли индекс константе cFigureIndexInvalid.
   end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,11 +48,11 @@ type
       FParams: TToolParamsList;
     class function GetParams: TToolParamsList; static; override;
   public
+    class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
     class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,27 +64,11 @@ type
       FParams: TToolParamsList;
     class function GetParams: TToolParamsList; static; override;
   public
+    class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
     class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-  end;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//TToolPolyline
-
-  TToolPolyline = class(TEditorTool)
-  private
-    class var
-      FParams: TToolParamsList;
-    class function GetParams: TToolParamsList; static; override;
-  public
-    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
-    class function GetName(): String; override;
-    class function GetFigureClass(): TCanvasFigureClass; override;
-    class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,13 +78,13 @@ type
   private
 	  class var
 	    FParams: TToolParamsList;
-  class function GetParams: TToolParamsList; static; override;
+    class function GetParams: TToolParamsList; static; override;
   public
+    class procedure Start(AFigureIndex: SizeInt; AXY: Tpoint); override;
     class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,11 +96,11 @@ type
 	    FParams: TToolParamsList;
   class function GetParams: TToolParamsList; static; override;
   public
+    class procedure Start(AFigureIndex: SizeInt; AXY: Tpoint); override;
     class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,9 +114,9 @@ type
   public
     class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class function GetName(): String; override;
+    class procedure Start(AFigureIndex: SizeInt; AXY: Tpoint); override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
   end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +131,6 @@ type
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
     class function Finish(aFigureIndex: SizeInt): Boolean;override;
 	end;
 
@@ -162,7 +144,6 @@ type
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
     class function Finish(aFigureIndex: SizeInt): Boolean;override;
 	end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -179,9 +160,23 @@ type
     class function GetName(): String; override;
     class function GetFigureClass(): TCanvasFigureClass; override;
     class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
-    class function Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
     class function Finish(aFigureIndex: SizeInt): Boolean; override;
 	end;
+
+	{ TToolCursor }
+
+ TToolCursor = class(TEditorTool)
+   private
+     class var
+      FCanDraw: Boolean; Previous: TPoint;
+   public
+    class procedure SetFigureParams (aFigureIndex: SizeInt); override;
+    class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
+    class function GetName(): String; override;
+    class function GetFigureClass(): TCanvasFigureClass; override;
+    class function Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean; override;
+    class function Finish(aFigureIndex: SizeInt): Boolean; override;
+  end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   TEditorToolClass = class of TEditorTool;
@@ -191,7 +186,6 @@ type
 function GetEditorTool(aIndex: SizeInt): TEditorToolClass;
 function EditorToolsCount(): SizeInt;
 procedure SetButton(Button: TMouseButton);
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -223,11 +217,60 @@ begin
   MBtn := Button;
 end;
 
+{ TToolCursor }
+
+class procedure TToolCursor.SetFigureParams(aFigureIndex: SizeInt);
+begin
+
+end;
+
+class procedure TToolCursor.Start(aFigureIndex: SizeInt; aXY: TPoint);
+begin
+	inherited Start(aFigureIndex, aXY);
+  if (FigureLeft.x <=aXY.x) and (FigureLeft.y <= aXY.y) and
+  (FigureRight.x >= aXY.x) and (FigureRight.y >= aXY.y) then begin
+	  Previous:=aXY;
+	  FCanDraw := true;
+	end;
+end;
+
+class function TToolCursor.GetName: String;
+begin
+  Result := 'Курсор';
+end;
+
+class function TToolCursor.GetFigureClass: TCanvasFigureClass;
+begin
+  Result := FFigureEmpty;
+end;
+
+class function TToolCursor.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
+var
+  i, j:SizeInt;
+  delta: TFloatPoint;
+begin
+	Result:=inherited Update(aFigureIndex, aXY);
+  if FCanDraw then
+  For i:=0 to FiguresCount() - 1  do
+    if GetFigure(i).selected then begin
+      delta := FloatPoint((aXY.x-Previous.x)/Zoom,(aXY.y-Previous.y)/Zoom);
+      GetFigure(i).MoveFigure(delta.x, delta.y);
+		end;
+  Previous := aXY;
+end;
+
+class function TToolCursor.Finish(aFigureIndex: SizeInt): Boolean;
+begin
+	Result:=inherited Finish(aFigureIndex);
+  FCanDraw:=False;
+  DeleteFigure(AFigureIndex);
+end;
+
 { TToolAllocator }
 
 class function TToolAllocator.GetParams: TToolParamsList;
 begin
-	Result:=inherited GetParams;
+
 end;
 
 class procedure TToolAllocator.Start(aFigureIndex: SizeInt; aXY: TPoint);
@@ -253,19 +296,28 @@ end;
 class function TToolAllocator.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
 	Result := inherited;
-  if not Result then Exit;
+  if not Result then Exit(false);
   GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
 end;
 
-class function TToolAllocator.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
-begin
-  Result := False;
-end;
-
 class function TToolAllocator.Finish(aFigureIndex: SizeInt): Boolean;
+var
+  i:SizeInt;
+  Counter:SizeInt;
 begin
   Result := aFigureIndex <> cFigureIndexInvalid;
   DeleteFigure(aFigureIndex);
+  If not beginingRun then
+    for Counter := 0 to FiguresCount() - 1 do
+      GetFigure(Counter).selected := GetFigure(Counter).RectInside(aMin, aMax)
+  else begin
+    for Counter := 0 to FiguresCount() - 1 do begin
+      GetFigure(Counter).selected := GetFigure(Counter).RectInside(aMin, aMax);
+      If GetFigure(Counter).selected then
+        For i:=0 to Counter-1 do
+          GetFigure(i).selected:=false;
+    end;
+  end;
 end;
 
 
@@ -302,14 +354,10 @@ begin
 	Result:= False;
 end;
 
-class function TToolZoom.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
-begin
-  Result := False;
-end;
-
 class function TToolZoom.Finish(aFigureIndex: SizeInt): Boolean;
 begin
-
+  Result := inherited Finish(AFigureIndex);
+  DeleteFigure(AFigureIndex);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -347,15 +395,10 @@ begin
     - ScreenToWorld(aXY.x, aXY.y).y;
 end;
 
-class function TToolHand.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
-begin
-  Result := False;
-  FCanDraw := false;
-end;
-
 class function TToolHand.Finish(aFigureIndex: SizeInt): Boolean;
 begin
-
+  Result := inherited Finish(AFigureIndex);
+  DeleteFigure(AFigureIndex);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -394,6 +437,12 @@ begin
 	Result := FParams;
 end;
 
+class procedure TToolPen.Start(aFigureIndex: SizeInt; aXY: TPoint);
+begin
+	inherited Start(aFigureIndex, aXY);
+  UnSelectAll();
+end;
+
 class procedure TToolPen.SetFigureParams(aFigureIndex: SizeInt);
 var
   fFigure: TCanvasFigure;
@@ -420,11 +469,6 @@ begin
   GetFigure(aFigureIndex).AddPoint(ScreenToWorld(aXY.x, aXY.y));
 end;
 
-class function TToolPen.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
-begin
-  Result := False;
-end;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TToolLine
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -432,6 +476,12 @@ end;
 class function TToolLine.GetParams: TToolParamsList;
 begin
 	Result := FParams;
+end;
+
+class procedure TToolLine.Start(aFigureIndex: SizeInt; aXY: TPoint);
+begin
+	inherited Start(aFigureIndex, aXY);
+  UnSelectAll();
 end;
 
 class procedure TToolLine.SetFigureParams(aFigureIndex: SizeInt);
@@ -460,56 +510,6 @@ begin
   GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
 end;
 
-class function TToolLine.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
-begin
-  Result := False;
-end;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// TToolPolyline
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class function TToolPolyline.GetParams: TToolParamsList;
-begin
-	Result := FParams;
-end;
-
-class procedure TToolPolyline.SetFigureParams(aFigureIndex: SizeInt);
-var
-  fFigure: TCanvasFigure;
-begin
-  fFigure := GetFigure(aFigureIndex);
-  fFigure.PenColor := (FParams[0] as TColorLineParam).Value;
-  fFigure.Width := (FParams[1] as TWidthLineParam).Value;
-  fFigure.PenStyle := (FParams[2] as TStyleLineParam).Value;
-end;
-
-class function TToolPolyline.GetName(): String;
-begin
-  Result := 'Ломаная';
-end;
-
-class function TToolPolyline.GetFigureClass(): TCanvasFigureClass;
-begin
-  Result := TFigurePolyline;
-end;
-
-class function TToolPolyline.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
-var
-  Figure: TCanvasFigure;
-begin
-  Result := inherited; if not Result then Exit;
-  Figure := GetFigure(aFigureIndex);
-  Figure.SetPoint(Figure.PointsCount()-1, ScreenToWorld(aXY.x, aXY.y));
-end;
-
-class function TToolPolyline.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
-begin
-  Result := aFigureIndex <> cFigureIndexInvalid;
-  if not Result then Exit;
-  GetFigure(aFigureIndex).AddPoint(ScreenToWorld(aXY.x, aXY.y));
-end;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TToolRectangle
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -517,6 +517,12 @@ end;
 class function TToolRectangle.GetParams: TToolParamsList;
 begin
 	Result := FParams;
+end;
+
+class procedure TToolRectangle.Start(AFigureIndex: SizeInt; AXY: Tpoint);
+begin
+	inherited Start(AFigureIndex, AXY);
+  UnSelectAll();
 end;
 
 class procedure TToolRectangle.SetFigureParams(aFigureIndex: SizeInt);
@@ -548,11 +554,6 @@ begin
   GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
 end;
 
-class function TToolRectangle.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
-begin
-  Result := False;
-end;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TToolRounRect
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -562,17 +563,26 @@ begin
 	Result := FParams;
 end;
 
+class procedure TToolRounRect.Start(AFigureIndex: SizeInt; AXY: Tpoint);
+begin
+	inherited Start(AFigureIndex, AXY);
+  UnSelectAll();
+end;
+
 class procedure TToolRounRect.SetFigureParams(aFigureIndex: SizeInt);
 var
   fFigure: TCanvasFigure;
 begin
   fFigure := GetFigure(aFigureIndex);
-  fFigure.PenColor := (FParams[0] as TColorLineParam).Value;
-  fFigure.BrushColor := (FParams[1] as TColorBrushParam).Value;
-  fFigure.Width := (FParams[2] as TWidthLineParam).Value;
-  fFigure.PenStyle := (FParams[3] as TStyleLineParam).Value;
-  fFigure.BrushStyle := (FParams[4] as TFillStyleParam).Value;
-  fFigure.Radius := (FParams[5] as TRadiusParam).Value;
+  with fFigure do begin
+		PenColor := (FParams[0] as TColorLineParam).Value;
+
+		Width := (FParams[2] as TWidthLineParam).Value;
+		BrushStyle := (FParams[4] as TFillStyleParam).Value;
+    BrushColor := (FParams[1] as TColorBrushParam).Value;
+    PenStyle := (FParams[3] as TStyleLineParam).Value;
+		Radius := (FParams[5] as TRadiusParam).Value;
+  end;
 end;
 
 class function TToolRounRect.GetName: String;
@@ -591,12 +601,6 @@ begin
   if not Result then Exit;
   GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
 end;
-
-class function TToolRounRect.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
-begin
-  Result := False;
-end;
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TToolEllipse
@@ -624,6 +628,12 @@ begin
   Result := 'Эллипс';
 end;
 
+class procedure TToolEllipse.Start(AFigureIndex: SizeInt; AXY: Tpoint);
+begin
+	inherited Start(AFigureIndex, AXY);
+  UnSelectAll();
+end;
+
 class function TToolEllipse.GetFigureClass(): TCanvasFigureClass;
 begin
   Result := TFigureEllipse;
@@ -633,11 +643,6 @@ class function TToolEllipse.Update(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
 begin
   Result := inherited; if not Result then Exit;
   GetFigure(aFigureIndex).SetPoint(1, ScreenToWorld(aXY.x, aXY.y));
-end;
-
-class function TToolEllipse.Step(aFigureIndex: SizeInt; aXY: TPoint): Boolean;
-begin
-  Result := False;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -655,13 +660,7 @@ initialization
     TToolRounRect,
     TToolEllipse,
     TToolAllocator,
-    TToolPolyline
-  );
-
-  TToolPolyline.FParams := TToolParamsList.Create(
-    TColorLineParam.Create,
-    TWidthLineParam.Create,
-    TStyleLineParam.Create
+    TToolCursor
   );
   TToolLine.FParams := TToolParamsList.Create(
     TColorLineParam.Create,

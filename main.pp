@@ -22,6 +22,8 @@ type
   TMainForm = class(TForm)
 		Deselect: TMenuItem;
 		DeleteBtn: TMenuItem;
+		Background: TMenuItem;
+		Forefront: TMenuItem;
 		SelectAll: TMenuItem;
 		spnZoom: TFloatSpinEdit;
 		HorizontalBar: TScrollBar;
@@ -39,8 +41,10 @@ type
     miHelp: TMenuItem;
     miAbout: TMenuItem;
 
-		procedure DeleteBtnClick(Sender: TObject);
+   	procedure DeleteBtnClick(Sender: TObject);
 	  procedure DeselectClick(Sender: TObject);
+		procedure MoveBack(Sender: TObject);
+		procedure MoveFrfront(Sender: TObject);
 		procedure SelectAllClick(Sender: TObject);
 	  procedure spnZoomChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -57,6 +61,7 @@ type
     procedure miAboutClick(Sender: TObject);
     procedure ChangeBorders();
     procedure SetScrollBar();
+		procedure spnZoomKeyPress(Sender: TObject; var Key: char);
 		procedure VerticalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
 			var ScrollPos: Integer);
 
@@ -71,7 +76,9 @@ var
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 implementation
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -89,11 +96,8 @@ begin
   Caption := Application.Title;
   for i := 0 to EditorToolsCount()-1 do
     lstTools.Items.Add(GetEditorTool(i).GetName());
-
   lstTools.ItemIndex := 0;
-
   fCurrentFigureIndex := cFigureIndexInvalid;
-
   SetScrollBar();
 end;
 
@@ -104,152 +108,48 @@ begin
   ScreenCenter := ScreenToWorld(PaintBox.Width div 2, PaintBox.Height div 2);
   ZoomPoint(ScreenCenter, spnZoom.Value / 100);
   SetScrollBar();
-  Invalidate();
+  PaintBox.Invalidate();
 end;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//work with selection
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 procedure TMainForm.DeselectClick(Sender: TObject);
-var
-  i: SizeInt;
 begin
-  for i:= 0 to FiguresCount()-1 do
-  begin
-    GetFigure(i).selected := False;
-    Invalidate;
-	end;
   UnSelectAll();
+  PaintBox.Invalidate();
+end;
+
+procedure TMainForm.MoveBack(Sender: TObject);
+begin
+  MoveBackground;
+  PaintBox.Invalidate();
+end;
+
+procedure TMainForm.MoveFrfront(Sender: TObject);
+begin
+  MoveForefront;
+  PaintBox.Invalidate();
 end;
 
 procedure TMainForm.SelectAllClick(Sender: TObject);
-var
-  i: SizeInt;
 begin
-  for i := 0 to FiguresCount() - 1 do
-  begin
-    GetFigure(i).selected := True;
-    Invalidate();
-	end;
   PSelectAll();
+  PaintBox.Invalidate();
 end;
 
 procedure TMainForm.DeleteBtnClick(Sender: TObject);
 begin
   DeleteSelected();
-  Invalidate();
+  PaintBox.Invalidate();
   UnSelectAll();
 end;
 
-procedure TMainForm.HorizontalBarScroll(Sender: TObject;
-	ScrollCode: TScrollCode; var ScrollPos: Integer);
-begin
-  ScreenOffset.X := HorizontalBar.Position;
-  Invalidate;
-end;
-
+//end
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-procedure TMainForm.PaintBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
-  X, Y: Integer);
-
-begin
-  SetButton(Button);
-
-  if fCurrentToolClass = nil then
-    exit;
-  begin
-  fCurrentFigureIndex := AddFigure(fCurrentToolClass.GetFigureClass());
-  fCurrentToolClass.SetFigureParams(fCurrentFigureIndex);
-
-  ToolBox.Enabled := False;
-  miEdit.Enabled := False;
-
-  fCurrentToolClass.Start(fCurrentFigureIndex, Point(X, Y));
-  PaintBox.Invalidate();
-  SetScrollBar();
-end;
-
-end;
-
-procedure TMainForm.PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-begin
-  if fCurrentToolClass = nil then
-    exit;
-  if fCurrentToolClass.Update(fCurrentFigureIndex, Point(X, Y)) then
-    PaintBox.Invalidate();
-  SetScrollBar();
-end;
-
-procedure TMainForm.PaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-begin
-  if fCurrentToolClass = nil then
-    exit;
-
-  if (not fCurrentToolClass.Step(fCurrentFigureIndex, Point(X, Y))) or
-  (Button = mbRight) then
-  begin
-    if fCurrentToolClass.Finish(fCurrentFigureIndex) then begin
-      fCurrentFigureIndex := cFigureIndexInvalid;
-      ToolBox.Enabled := True;
-      miEdit.Enabled := True;
-      PaintBox.Invalidate();
-    end;
-  end;
-  beginingRun := true;
-end;
-
-procedure TMainForm.PaintBoxPaint(Sender: TObject);
-var
-  i: SizeInt;
-begin
-  spnZoom.Value := double(Zoom * 100);
-  PaintBox.Canvas.Clear();
-  for i := 0 to FiguresCount()-1 do
-    GetFigure(i).Draw(PaintBox.Canvas);
-  for i := 0 to FiguresCount()-1 do
-    GetFigure(i).DrawSelection(PaintBox.Canvas);
-end;
-
+//work with Scroll
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-procedure TMainForm.lstToolsSelectionChange(Sender: TObject; User: boolean);
-var
-  i: TToolParam;
-  l: TLabel;
-begin
-  fCurrentToolClass := GetEditorTool(lstTools.ItemIndex);
-  ToolParamsPanel.DestroyComponents;
-  for i in fCurrentToolClass.Params do
-  begin
-    ToolParamsPanel.Visible := False;
-    i.ToControl(ToolParamsPanel).Align := alBottom;
-
-    l := TLabel.Create(ToolParamsPanel);
-    l.Parent := ToolParamsPanel;
-    l.Caption := i.Name;
-    l.Align := alBottom;
-    ToolParamsPanel.Visible := True;
-    Invalidate();
-	end;
-end;
-
-procedure TMainForm.miClearImageClick(Sender: TObject);
-begin
-  if (MessageDlg('Вы уверены, что хотите очистить изображение?',
-      mtConfirmation, mbYesNo, 0) = mrYes) then
-  begin
-    ClearFigures();
-    PaintBox.Invalidate();
-  end;
-end;
-
-procedure TMainForm.miAboutClick(Sender: TObject);
-begin
-  MessageDlg(miAbout.Caption,
-    Application.Title + ' - Векторный графический редактор.' + LineEnding +
-    'Русак Диана Игоревна, Б8103а, ДВФУ, 2017 год.',
-    mtInformation, [mbOK], 0
-  );
-end;
 
 procedure TMainForm.ChangeBorders;
 var
@@ -274,6 +174,20 @@ begin
     WorldBottomRight.x := max (WorldBottomRight.x, GetFigure(i).BottomRight().x);
     WorldBottomRight.y := max (WorldBottomRight.y, GetFigure(i).BottomRight().y);
 	end;
+end;
+
+procedure TMainForm.HorizontalBarScroll(Sender: TObject;
+	ScrollCode: TScrollCode; var ScrollPos: Integer);
+begin
+  ScreenOffset.X := HorizontalBar.Position;
+  PaintBox.Invalidate();
+end;
+
+procedure TMainForm.VerticalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
+	var ScrollPos: Integer);
+begin
+  ScreenOffset.Y := VerticalBar.Position;
+  PaintBox.Invalidate();
 end;
 
 procedure TMainForm.SetScrollBar;
@@ -302,11 +216,125 @@ begin
   Round(PaintBox.Height / Zoom));
 end;
 
-procedure TMainForm.VerticalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
-	var ScrollPos: Integer);
+//end
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//work with mouse
+
+procedure TMainForm.PaintBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
+  X, Y: Integer);
 begin
-  ScreenOffset.Y := VerticalBar.Position;
+
+  SetButton(Button);
+  if Button = mbLeft then begin
+
+
+  if fCurrentToolClass = nil then
+    exit;
+
+  if ((FCurrentToolClass) <> (TToolZoom))
+  and ((FCurrentToolClass) <> (TToolAllocator))
+  and ((FCurrentToolClass) <> (TToolHand))
+  and ((FCurrentToolClass) <> (TToolCursor))then
+    UnSelectAll();
+
+  fCurrentFigureIndex := AddFigure(fCurrentToolClass.GetFigureClass());
+  fCurrentToolClass.SetFigureParams(fCurrentFigureIndex);
+  fCurrentToolClass.Start(fCurrentFigureIndex, Point(X, Y));
   PaintBox.Invalidate();
+  SetScrollBar();
+end
+end;
+
+procedure TMainForm.PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+begin
+  if fCurrentToolClass = nil then
+    exit;
+  if fCurrentToolClass.Update(fCurrentFigureIndex, Point(X, Y)) then
+    PaintBox.Invalidate();
+  SetScrollBar();
+end;
+
+procedure TMainForm.PaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if fCurrentToolClass = nil then
+    exit;
+  if Button = mbLeft then
+  begin
+    if fCurrentToolClass.Finish(fCurrentFigureIndex) then begin
+      fCurrentFigureIndex := cFigureIndexInvalid;
+      PaintBox.Invalidate();
+    end;
+  end;
+end;
+
+//end
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//workplace
+////////////////////////////////////////////////////////////////////////////////////////////////////
+procedure TMainForm.PaintBoxPaint(Sender: TObject);
+var
+  i: SizeInt;
+	count: Integer;
+begin
+  spnZoom.Value := double(Zoom * 100);
+  PaintBox.Canvas.Clear();
+  for i := 0 to FiguresCount()-1 do
+    GetFigure(i).Draw(PaintBox.Canvas);
+  for count:= 0 to FiguresCount()-1 do begin
+    GetFigure(count).DrawSelection(PaintBox.Canvas);
+	end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+procedure TMainForm.lstToolsSelectionChange(Sender: TObject; User: boolean);
+var
+  i: TToolParam;
+  l: TLabel;
+begin
+  fCurrentToolClass := GetEditorTool(lstTools.ItemIndex);
+  ToolParamsPanel.DestroyComponents;
+  for i in fCurrentToolClass.Params do
+  begin
+    ToolParamsPanel.Visible := False;
+    i.ToControl(ToolParamsPanel).Align := alBottom;
+    l := TLabel.Create(ToolParamsPanel);
+    l.Parent := ToolParamsPanel;
+    l.Caption := i.Name;
+    l.Align := alBottom;
+    ToolParamsPanel.Visible := True;
+    PaintBox.Invalidate();
+	end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//mi click
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+procedure TMainForm.miClearImageClick(Sender: TObject);
+begin
+  if (MessageDlg('Вы уверены, что хотите очистить изображение?',
+      mtConfirmation, mbYesNo, 0) = mrYes) then
+  begin
+    ClearFigures();
+    PaintBox.Invalidate();
+  end;
+end;
+
+procedure TMainForm.miAboutClick(Sender: TObject);
+begin
+  MessageDlg(miAbout.Caption,
+    Application.Title + ' - Векторный графический редактор.' + LineEnding +
+    'Русак Диана Игоревна, Б8103а, ДВФУ, 2017 год.',
+    mtInformation, [mbOK], 0
+  );
+end;
+
+
+procedure TMainForm.spnZoomKeyPress(Sender: TObject; var Key: char);
+begin
+  Key:=#0;
 end;
 
 end.

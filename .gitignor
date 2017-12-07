@@ -1,0 +1,10 @@
+'#' Lines starting with '#' are considered comments.
+
+*.[oa]
+
+*.exe
+*.out/
+*.lfm
+
+backup/
+lib/
