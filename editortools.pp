@@ -168,7 +168,9 @@ type
  TToolCursor = class(TEditorTool)
    private
      class var
-      FCanDraw: Boolean; Previous: TPoint;
+	    FigureIndex: SizeInt;
+	    AnchorIndex: SizeInt;
+      FCanDraw: Boolean; Previous: TPoint; fCanResiz: Boolean;
    public
     class procedure SetFigureParams (aFigureIndex: SizeInt); override;
     class procedure Start(aFigureIndex: SizeInt; aXY: TPoint); override;
@@ -225,6 +227,9 @@ begin
 end;
 
 class procedure TToolCursor.Start(aFigureIndex: SizeInt; aXY: TPoint);
+var
+  i,j, ot:SizeInt;
+  AmountResize:TPoint;
 begin
 	inherited Start(aFigureIndex, aXY);
   if (FigureLeft.x <=aXY.x) and (FigureLeft.y <= aXY.y) and
@@ -232,6 +237,21 @@ begin
 	  Previous:=aXY;
 	  FCanDraw := true;
 	end;
+  For i:=0 to FiguresCount()-1 do begin
+    If GetFigure(i).selected then
+    For j:=Low(GetFigure(i).fPoints) to High(GetFigure(i).fPoints) do begin
+      AmountResize:=WorldToScreen(GetFigure(i).fPoints[j].x,GetFigure(i).fPoints[j].y);
+      If (AmountResize.x - Err < aXY.x) and
+        (AmountResize.x + Err  > aXY.x) and
+        (AmountResize.y - Err < aXY.y) and
+        (AmountResize.y + Err > aXY.y) then begin
+        FigureIndex:= i;
+        AnchorIndex:= j;
+        fCanResiz := True;
+        fCanDraw := False;
+      end;
+    end;
+  end;
 end;
 
 class function TToolCursor.GetName: String;
@@ -250,19 +270,23 @@ var
   delta: TFloatPoint;
 begin
 	Result:=inherited Update(aFigureIndex, aXY);
-  if FCanDraw then
+  if fCanDraw then
   For i:=0 to FiguresCount() - 1  do
     if GetFigure(i).selected then begin
       delta := FloatPoint((aXY.x-Previous.x)/Zoom,(aXY.y-Previous.y)/Zoom);
       GetFigure(i).MoveFigure(delta.x, delta.y);
 		end;
+
+  if fCanResiz then
+      GetFigure(FigureIndex).ResizeFigure(AnchorIndex, aXY.x - Previous.x, aXY.y - Previous.y);
   Previous := aXY;
 end;
 
 class function TToolCursor.Finish(aFigureIndex: SizeInt): Boolean;
 begin
-	Result:=inherited Finish(aFigureIndex);
-  FCanDraw:=False;
+	Result := inherited Finish(aFigureIndex);
+  fCanDraw := False;
+  fCanResiz := False;
   DeleteFigure(AFigureIndex);
 end;
 

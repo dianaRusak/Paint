@@ -16,6 +16,7 @@ uses
 const
   cFigureIndexInvalid = -1;
   intMin = 2 - MaxInt;
+  Err = 7;
 
 type
   TPointArray = array of TPoint;
@@ -23,8 +24,9 @@ type
 	{ TCanvasFigure }
 
   TCanvasFigure = class
+  fPoints: array of TFloatPoint;
   strict protected
-    fPoints: array of TFloatPoint;
+
     fWidth: Integer;
     fPenStyle: TPenStyle;
     fPenColor: TColor;
@@ -34,6 +36,7 @@ type
   public
     Selected : boolean;
     function TopLeft():TFloatPoint;
+    procedure ResizeFigure(fPointIndex: SizeInt; dX, dY: extended);
     procedure DrawSelection (aCanvas: TCanvas);
     function BottomRight():TFloatPoint;
     procedure AddPoint(aValue: TFloatPoint);
@@ -242,6 +245,7 @@ begin
   end;
 end;
 
+
 { FFigureAllotment }
 
 procedure FFigureAllotment.Draw(aCanvas: TCanvas);
@@ -280,6 +284,12 @@ begin
 		end;
 end;
 
+procedure TCanvasFigure.ResizeFigure(fPointIndex: SizeInt; dX, dY: extended);
+begin
+  fPoints[fPointIndex].x := fPoints[fPointIndex].x + dx;
+  fPoints[fPointIndex].y := fPoints[fPointIndex].y + dy;
+end;
+
 procedure TCanvasFigure.DrawSelection(aCanvas: TCanvas);
 var
   ot: SizeInt;
@@ -295,14 +305,18 @@ begin
 	    Pen.Width := 1;
 	    Pen.Style := psDash;
 		  Brush.Style := bsClear;
-	    Rectangle(FigureLeft.X - ot - 7, FigureLeft.Y - ot - 7, FigureRight.X + ot + 7,
-      FigureRight.Y + ot + 7);
+
+	    Rectangle(FigureLeft.X - ot - Err, FigureLeft.Y - ot - Err, FigureRight.X + ot + Err,
+      FigureRight.Y + ot + Err);
+
       Pen.Color := clBlue;
  	    Pen.Width := 2;
  	    Pen.Style := psSolid;
  		  Brush.Style := bsClear;
-      Rectangle(FigureLeft.X - ot - 7, FigureLeft.Y - ot - 7, FigureLeft.X + 1, FigureLeft.Y + 1);
-      Rectangle(FigureRight.X - ot + 7, FigureRight.Y - ot + 7, FigureRight.X + 1, FigureRight.Y + 1);
+
+      Rectangle(FigureLeft.X - Err, FigureLeft.Y - Err, FigureLeft.X + Err,  FigureLeft.Y + Err);
+      Rectangle(FigureRight.X + Err, FigureRight.Y + Err, FigureRight.X - Err, FigureRight.Y - Err);
+
 	  end;
   end;
 end;
