@@ -389,7 +389,7 @@ end;
 
 function TCanvasFigure.RectInside(RectLeft, RectRight: TFloatPoint): boolean;
 const
-    eps = 10;
+  eps = 10;
 var
   FigureLeft, FigureRight: TFloatPoint;
   diag: double;

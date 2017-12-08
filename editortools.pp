@@ -229,28 +229,29 @@ end;
 class procedure TToolCursor.Start(aFigureIndex: SizeInt; aXY: TPoint);
 var
   i,j, ot:SizeInt;
-  AmountResize:TPoint;
+  anchorScr:TPoint;
 begin
 	inherited Start(aFigureIndex, aXY);
   if (FigureLeft.x <=aXY.x) and (FigureLeft.y <= aXY.y) and
-  (FigureRight.x >= aXY.x) and (FigureRight.y >= aXY.y) then begin
+    (FigureRight.x >= aXY.x) and (FigureRight.y >= aXY.y) then begin
 	  Previous:=aXY;
 	  FCanDraw := true;
 	end;
   For i:=0 to FiguresCount()-1 do begin
     If GetFigure(i).selected then
-    For j:=Low(GetFigure(i).fPoints) to High(GetFigure(i).fPoints) do begin
-      AmountResize:=WorldToScreen(GetFigure(i).fPoints[j].x,GetFigure(i).fPoints[j].y);
-      If (AmountResize.x - Err < aXY.x) and
-        (AmountResize.x + Err  > aXY.x) and
-        (AmountResize.y - Err < aXY.y) and
-        (AmountResize.y + Err > aXY.y) then begin
-        FigureIndex:= i;
-        AnchorIndex:= j;
-        fCanResiz := True;
-        fCanDraw := False;
-      end;
-    end;
+	    For j:=Low(GetFigure(i).fPoints) to High(GetFigure(i).fPoints) do begin
+	      anchorScr:=WorldToScreen(GetFigure(i).fPoints[j].x,GetFigure(i).fPoints[j].y);
+	      If (anchorScr.x - Err < aXY.x) and
+	        (anchorScr.x + Err  > aXY.x) and
+	        (anchorScr.y - Err < aXY.y) and
+	        (anchorScr.y + Err > aXY.y) then begin
+	        FigureIndex:= i;
+
+	        AnchorIndex:= j;
+	        fCanResiz := True;
+	        fCanDraw := False;
+	      end;
+	    end;
   end;
 end;
 
