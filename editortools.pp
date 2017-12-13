@@ -423,7 +423,6 @@ end;
 class function TToolHand.Finish(aFigureIndex: SizeInt): Boolean;
 begin
   Result := inherited Finish(AFigureIndex);
-  DeleteFigure(AFigureIndex);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

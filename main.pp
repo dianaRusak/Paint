@@ -17,6 +17,8 @@ uses
 
 type
 
+  TPointArray = array of TPoint;
+
   { TMainForm }
 
   TMainForm = class(TForm)
@@ -24,6 +26,11 @@ type
 		DeleteBtn: TMenuItem;
 		Background: TMenuItem;
 		Forefront: TMenuItem;
+		Memo1: TMemo;
+		SaveClick: TMenuItem;
+		Open: TMenuItem;
+		OpenDialog: TOpenDialog;
+		SaveDialog: TSaveDialog;
 		SelectAll: TMenuItem;
 		spnZoom: TFloatSpinEdit;
 		HorizontalBar: TScrollBar;
@@ -45,9 +52,12 @@ type
 	  procedure DeselectClick(Sender: TObject);
 		procedure MoveBack(Sender: TObject);
 		procedure MoveFrfront(Sender: TObject);
+		procedure OpenClick(Sender: TObject);
+		procedure SaveClickClick(Sender: TObject);
 		procedure SelectAllClick(Sender: TObject);
 	  procedure spnZoomChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FileConstructor();
 		procedure HorizontalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
 			var ScrollPos: Integer);
     procedure PaintBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
@@ -101,6 +111,11 @@ begin
   SetScrollBar();
 end;
 
+procedure TMainForm.FileConstructor;
+begin
+
+end;
+
 procedure TMainForm.spnZoomChange(Sender: TObject);
 var
   ScreenCenter: TFloatPoint;
@@ -131,6 +146,46 @@ procedure TMainForm.MoveFrfront(Sender: TObject);
 begin
   MoveForefront;
   PaintBox.Invalidate();
+end;
+
+procedure TMainForm.OpenClick(Sender: TObject);
+var
+  PntBox: TStringList;
+begin
+  PntBox:= TStringList.Create;
+  if OpenDialog.Execute then PntBox.LoadFromFile(OpenDialog.FileName);
+  PntBox.Free
+end;
+
+procedure TMainForm.SaveClickClick(Sender: TObject);
+var
+  i, j, len:integer;
+  Points:TPointArray;
+  str, FName: String;
+begin
+  SaveDialog.FileName := 'My perfect project.json';
+  if SaveDialog.Execute then begin
+    Memo1.Lines.Clear;
+    for i:= 0 to FiguresCount()-1 do
+    begin
+      Memo1.Lines.Add('{');
+      Points := GetFigure(i).GetCanvasPoints();
+      len := Length(Points) - 1;
+      for j := 0 to len do begin
+        str := str + FloatToStr(Points[j].x) + ', ';
+        str := str + FloatToStr(Points[j].y);
+        if j <> len then
+          str := str + ', '
+        else
+          str := str + ' ]';
+			end;
+			Memo1.Lines.Add('"Points":[');
+      Memo1.Lines.Add(str);//
+      Memo1.Lines.Add('}');
+		end;
+    FName:= SaveDialog.FileName;
+    Memo1.Lines.SaveToFile(FName);
+	end;
 end;
 
 procedure TMainForm.SelectAllClick(Sender: TObject);
@@ -227,22 +282,21 @@ begin
   SetButton(Button);
   if Button = mbLeft then begin
 
+	  if fCurrentToolClass = nil then
+	    exit;
 
-  if fCurrentToolClass = nil then
-    exit;
+	  if ((FCurrentToolClass) <> (TToolZoom))
+	  and ((FCurrentToolClass) <> (TToolAllocator))
+	  and ((FCurrentToolClass) <> (TToolHand))
+	  and ((FCurrentToolClass) <> (TToolCursor))then
+	    UnSelectAll();
 
-  if ((FCurrentToolClass) <> (TToolZoom))
-  and ((FCurrentToolClass) <> (TToolAllocator))
-  and ((FCurrentToolClass) <> (TToolHand))
-  and ((FCurrentToolClass) <> (TToolCursor))then
-    UnSelectAll();
-
-  fCurrentFigureIndex := AddFigure(fCurrentToolClass.GetFigureClass());
-  fCurrentToolClass.SetFigureParams(fCurrentFigureIndex);
-  fCurrentToolClass.Start(fCurrentFigureIndex, Point(X, Y));
-  PaintBox.Invalidate();
-  SetScrollBar();
-end
+	  fCurrentFigureIndex := AddFigure(fCurrentToolClass.GetFigureClass());
+	  fCurrentToolClass.SetFigureParams(fCurrentFigureIndex);
+	  fCurrentToolClass.Start(fCurrentFigureIndex, Point(X, Y));
+	  Invalidate();
+	  SetScrollBar();
+  end
 end;
 
 procedure TMainForm.PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -250,7 +304,7 @@ begin
   if fCurrentToolClass = nil then
     exit;
   if fCurrentToolClass.Update(fCurrentFigureIndex, Point(X, Y)) then
-    PaintBox.Invalidate();
+    Invalidate();
   SetScrollBar();
 end;
 
@@ -263,7 +317,7 @@ begin
   begin
     if fCurrentToolClass.Finish(fCurrentFigureIndex) then begin
       fCurrentFigureIndex := cFigureIndexInvalid;
-      PaintBox.Invalidate();
+      Invalidate();
     end;
   end;
 end;
@@ -331,10 +385,10 @@ begin
   );
 end;
 
-
 procedure TMainForm.spnZoomKeyPress(Sender: TObject; var Key: char);
 begin
   Key:=#0;
 end;
+
 
 end.
