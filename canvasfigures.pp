@@ -14,6 +14,9 @@ uses
   Transform;
 
 const
+  fStylesLine: array[0..5] of TPenStyle = (psSolid, psClear, psDot, psDash,
+     psDashDot, psDashDotDot);
+
   cFigureIndexInvalid = -1;
   intMin = 2 - MaxInt;
   Err = 7;
@@ -21,24 +24,23 @@ const
 type
   TPointArray = array of TPoint;
 
-	{ TCanvasFigure }
+  { TCanvasFigure }
 
   TCanvasFigure = class
   fPoints: array of TFloatPoint;
   strict protected
-
     fWidth: Integer;
     fPenStyle: TPenStyle;
     fPenColor: TColor;
-    fBrushStyle: TBrushStyle;
     fBrushColor: TColor;
-    fRadius: integer;
+    fBrushStyle: TBrushStyle;
+    fRadius: Integer;
   public
-    Selected : boolean;
-    function TopLeft():TFloatPoint;
+    Selected: boolean;
     procedure ResizeFigure(fPointIndex: SizeInt; dX, dY: extended);
     procedure DrawSelection (aCanvas: TCanvas);
-    function BottomRight():TFloatPoint;
+    function BottomRight():TFloatPoint;virtual;
+    function TopLeft():TFloatPoint;virtual;
     procedure AddPoint(aValue: TFloatPoint);
     function LenPoints():Integer;virtual;
     function GetPoint(aIndex: SizeInt): TFloatPoint;
@@ -48,64 +50,74 @@ type
     procedure MoveFigure(dx, dy: extended);
     function RectInside(RectLeft, RectRight: TFloatPoint): boolean;
     procedure Draw(aCanvas: TCanvas); virtual;
-    property Radius: integer read fRadius write fRadius;
-    property Width: Integer read fWidth write fWidth;
-    property PenStyle: TPenStyle read fPenStyle write fPenStyle;
-    property PenColor: TColor read fPenColor write fPenColor;
-    property BrushStyle: TBrushStyle read fBrushStyle write fBrushStyle;
-    property BrushColor: TColor read fBrushColor write fBrushColor;
+    published
+      property Radius: integer read fRadius write fRadius;
+      property Width: Integer read fWidth write fWidth;
+      property PenStyle: TPenStyle read fPenStyle write fPenStyle;
+      property PenColor: TColor read fPenColor write fPenColor;
+      property BrushStyle: TBrushStyle read fBrushStyle write fBrushStyle;
+      property BrushColor: TColor read fBrushColor write fBrushColor;
   end;
 
 	{ TFigurePen }
 
-  TFigurePen = class(TCanvasFigure)
-  public
-    procedure Draw(aCanvas: TCanvas); override;
-  end;
+TFigurePen = class(TCanvasFigure)
+public
+  function BottomRight():TFloatPoint;virtual;
+  function TopLeft():TFloatPoint;virtual;
+  procedure Draw(aCanvas: TCanvas); override;
+end;
 
 	{ TFigureLine }
 
-  TFigureLine = class(TCanvasFigure)
-  public
-    procedure Draw(aCanvas: TCanvas); override;
-  end;
+TFigureLine = class(TCanvasFigure)
+public
+  function BottomRight():TFloatPoint;virtual;
+  function TopLeft():TFloatPoint;virtual;
+  procedure Draw(aCanvas: TCanvas); override;
+end;
 
 	{ TFigureRectangle }
 
-  TFigureRectangle = class(TCanvasFigure)
-  public
-    procedure Draw(aCanvas: TCanvas); override;
-  end;
+TFigureRectangle = class(TCanvasFigure)
+public
+  procedure GetParams(aCanvas: TCanvas);
+  procedure Draw(aCanvas: TCanvas); override;
+end;
 
 	{ TFigureEllipse }
 
-  TFigureEllipse = class(TCanvasFigure)
-  public
-    procedure Draw(aCanvas: TCanvas); override;
-  end;
-
-	{ FFigureEmpty }
-
-  FFigureEmpty = class(TCanvasFigure)
-  public
-    procedure Draw(aCanvas: TCanvas); override;
-	end;
+TFigureEllipse = class(TCanvasFigure)
+public
+  function BottomRight():TFloatPoint;virtual;
+  function TopLeft():TFloatPoint;virtual;
+  procedure Draw(aCanvas: TCanvas); override;
+end;
 
 	{ TFigureRoundRect }
 
-  TFigureRoundRect = class(TCanvasFigure)
-  public
-    procedure Draw(aCanvas: TCanvas); override;
-	end;
+TFigureRoundRect = class(TCanvasFigure)
+public
+  function BottomRight():TFloatPoint;virtual;
+  function TopLeft():TFloatPoint;virtual;
+  procedure Draw(aCanvas: TCanvas); override;
+end;
+  
+	{ FFigureEmpty }
+
+FFigureEmpty = class(TCanvasFigure)
+public
+  procedure Draw(aCanvas: TCanvas); override;
+end;
 
 	{ FFigureAllotment }
 
-  FFigureAllotment = class(TCanvasFigure)
-  public
-    procedure Draw(aCanvas: TCanvas); override;
-	end;
+FFigureAllotment = class(TCanvasFigure)
+public
+  procedure Draw(aCanvas: TCanvas); override;
+end;
 
-	TCanvasFigureClass = class of TCanvasFigure;
+TCanvasFigureClass = class of TCanvasFigure;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -119,6 +131,11 @@ procedure UnSelectAll();
 procedure DeleteSelected();
 procedure MoveForefront();
 procedure MoveBackground();
+function StrToClassFigure(str: String):TCanvasFigureClass;
+function StyleToNum(style: TPenStyle):integer;
+function NumToStyle(int:integer):TPenStyle;
+function BrushStyleToNum(style: TBrushStyle):integer;
+function NumToBrushStyle(int:integer):TBrushStyle;
 
 var
   beginingRun: Boolean;
@@ -202,14 +219,14 @@ begin
     begin
       FreeAndNil(FiguresData[i]);
       Inc(j);
-		end;
+    end;
   for k := 1 to j do
     for i:= Low(FiguresData) to High (FiguresData)-1 do
       if (FiguresData[i] = nil) and (i + 1 < Length(FiguresData)) then
       begin
         FiguresData[i] := FiguresData[i+1];
         FiguresData[i+1] := nil;
-	   	end;
+      end;
   SetLength(FiguresData, Length(FiguresData) - j);
 end;
 
@@ -245,6 +262,67 @@ begin
   end;
 end;
 
+function StrToClassFigure(str: String):TCanvasFigureClass;
+begin
+  case str of
+    'TFigurePen': Result := TFigurePen;
+    'TFigureLine': Result := TFigureLine;
+    'TFigureRectangle': Result := TFigureRectangle;
+    'TFigureEllipse': Result := TFigureEllipse;
+    'TFigureRoundRect': Result := TFigureRoundRect;
+  end;
+end;
+
+function StyleToNum(style: TPenStyle): integer;
+begin
+   case style of
+     psSolid: Result := 0;
+     psDash: Result := 1;
+     psDot: Result := 2;
+     psDashDot: Result := 3;
+     psDashDotDot: Result := 4;
+   end;
+end;
+
+function NumToStyle(int: integer): TPenStyle;
+begin
+  case int of
+    0: Result := psSolid;
+    1: Result := psDash;
+    2: Result := psDot;
+    3: Result := psDashDot;
+    4: Result := psDashDotDot;
+  end;
+end;
+
+function BrushStyleToNum(style: TBrushStyle): integer;
+
+begin
+   case style of
+     bsSolid: Result := 0;
+     bsClear: Result := 1;
+     bsHorizontal: Result := 2;
+     bsVertical: Result := 3;
+     bsFDiagonal: Result := 4;
+     bsBDiagonal: Result := 5;
+     bsDiagCross: Result := 6;
+     bsCross: Result := 7;
+   end;
+end;
+
+function NumToBrushStyle(int: integer): TBrushStyle;
+begin
+  case int of
+    0: Result := bsSolid;
+    1: Result := bsClear;
+    2: Result := bsHorizontal;
+    3: Result := bsVertical;
+    4: Result := bsFDiagonal;
+    5: Result := bsBDiagonal;
+    6: Result := bsDiagCross ;
+    7: Result := bsCross;
+  end;
+end;
 
 { FFigureAllotment }
 
@@ -258,7 +336,7 @@ begin
     Color := clPurple;
     Width := 1;
     Style := psDash;
-	end;
+  end;
   aCanvas.Brush.Style := bsClear;
   aCanvas.Rectangle(cPoints[0].x, cPoints[0].y, cPoints[1].x, cPoints[1].y);
   aMin.x := Min(cPoints[0].x, cPoints[1].x);
@@ -272,7 +350,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-function TCanvasFigure.TopLeft: TFloatPoint;
+function TCanvasFigure.TopLeft(): TFloatPoint;
 var
   i: TFloatPoint;
 begin
@@ -281,7 +359,7 @@ begin
     begin
       Result.x := min (Result.x, i.x);
       Result.y := min (Result.y, i.y);
-		end;
+    end;
 end;
 
 procedure TCanvasFigure.ResizeFigure(fPointIndex: SizeInt; dX, dY: extended);
@@ -298,39 +376,39 @@ begin
   if (Selected) then
   begin
     FigureLeft := WorldToScreen(TopLeft.x, TopLeft.y);
-  	FigureRight := WorldToScreen(BottomRight.x, BottomRight.y);
+    FigureRight := WorldToScreen(BottomRight.x, BottomRight.y);
     with aCanvas do
-	  begin
-	    Pen.Color := clPurple;
-	    Pen.Width := 1;
-	    Pen.Style := psDash;
-		  Brush.Style := bsClear;
+    begin
+      Pen.Color := clBlack;
+      Pen.Width := 1;
+      Pen.Style := psDash;
+      Brush.Style := bsClear;
 
-	    Rectangle(FigureLeft.X - ot - Err, FigureLeft.Y - ot - Err, FigureRight.X + ot + Err,
+      Rectangle(FigureLeft.X - ot - Err, FigureLeft.Y - ot - Err, FigureRight.X + ot + Err,
       FigureRight.Y + ot + Err);
 
       Pen.Color := clBlue;
- 	    Pen.Width := 2;
- 	    Pen.Style := psSolid;
- 		  Brush.Style := bsClear;
+      Pen.Width := 2;
+      Pen.Style := psSolid;
+      Brush.Style := bsClear;
 
       Rectangle(FigureLeft.X - Err, FigureLeft.Y - Err, FigureLeft.X + Err,  FigureLeft.Y + Err);
       Rectangle(FigureRight.X + Err, FigureRight.Y + Err, FigureRight.X - Err, FigureRight.Y - Err);
 
-	  end;
+    end;
   end;
 end;
 
-function TCanvasFigure.BottomRight: TFloatPoint;
+function TCanvasFigure.BottomRight(): TFloatPoint;
 var
   i: TFloatPoint;
 begin
   Result := fPoints[0];
   for i in fPoints do
-    begin
+  begin
       Result.x := max (Result.x, i.x);
       Result.y := max (Result.y, i.y);
-		end;
+  end;
 end;
 
 procedure TCanvasFigure.AddPoint(aValue: TFloatPoint);
@@ -342,7 +420,7 @@ begin
   fPoints[Len] := aValue;
 end;
 
-function TCanvasFigure.LenPoints: Integer;
+function TCanvasFigure.LenPoints(): Integer;
 var
   cPoints: TPointArray;
 begin
@@ -355,7 +433,7 @@ begin
   Result := fPoints[aIndex];
 end;
 
-function TCanvasFigure.GetCanvasPoints: TPointArray;
+function TCanvasFigure.GetCanvasPoints(): TPointArray;
 var
   CanvasPoints: TPointArray;
   i: integer;
@@ -417,18 +495,28 @@ procedure TCanvasFigure.Draw(aCanvas: TCanvas);
 begin
   with aCanvas do begin
     Pen.Width := fWidth;
-	  Pen.Style := fPenStyle;
-	  Pen.Color := fPenColor;
-	  Brush.Style := fBrushStyle;
-	  if Brush.Style <> bsClear then
-	      Brush.Color := fBrushColor;
-	  Radius := fRadius;
+    Pen.Style := fPenStyle;
+    Pen.Color := fPenColor;
+    Brush.Style := fBrushStyle;
+    if Brush.Style <> bsClear then
+	Brush.Color := fBrushColor;
+    Radius := fRadius;
   end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TFigurePen
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function TFigurePen.BottomRight(): TFloatPoint;
+begin
+  inherited
+end;
+
+function TFigurePen.TopLeft(): TFloatPoint;
+begin
+  inherited
+end;
 
 procedure TFigurePen.Draw(aCanvas: TCanvas);
 var
@@ -451,6 +539,16 @@ end;
 // TFigureLine
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function TFigureLine.BottomRight(): TFloatPoint;
+begin
+  inherited
+end;
+
+function TFigureLine.TopLeft(): TFloatPoint;
+begin
+  inherited
+end;
+
 procedure TFigureLine.Draw(aCanvas: TCanvas);
 var
   cPoints: TPointArray;
@@ -463,6 +561,11 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TFigureRectangle
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+procedure TFigureRectangle.GetParams(aCanvas: TCanvas);
+begin
+  inherited;
+end;
 
 procedure TFigureRectangle.Draw(aCanvas: TCanvas);
 var
@@ -478,12 +581,22 @@ end;
 //TFigureRoundRect
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function TFigureRoundRect.BottomRight(): TFloatPoint;
+begin
+  inherited
+end;
+
+function TFigureRoundRect.TopLeft(): TFloatPoint;
+begin
+  inherited
+end;
+
 procedure TFigureRoundRect.Draw(aCanvas: TCanvas);
 var
   cPoints: TPointArray;
   i:integer;
 begin
-	inherited;
+  inherited;
   cPoints := GetCanvasPoints();
   aCanvas.RoundRect(cPoints[0].x, cPoints[0].y, cPoints[1].x, cPoints[1].y, Radius, Radius);
 end;
@@ -491,6 +604,16 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TFigureEllipse
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function TFigureEllipse.BottomRight(): TFloatPoint;
+begin
+  inherited
+end;
+
+function TFigureEllipse.TopLeft(): TFloatPoint;
+begin
+  inherited
+end;
 
 procedure TFigureEllipse.Draw(aCanvas: TCanvas);
 var

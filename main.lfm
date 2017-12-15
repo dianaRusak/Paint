@@ -1,0 +1,193 @@
+object MainForm: TMainForm
+  Left = 968
+  Height = 625
+  Top = 95
+  Width = 732
+  ClientHeight = 605
+  ClientWidth = 732
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 640
+  Menu = MainMenu
+  OnCreate = FormCreate
+  Position = poDesktopCenter
+  LCLVersion = '1.8.0.6'
+  Visible = True
+  object ToolBox: TPanel
+    Left = 0
+    Height = 605
+    Top = 0
+    Width = 144
+    Align = alLeft
+    BevelInner = bvRaised
+    BevelOuter = bvNone
+    ClientHeight = 605
+    ClientWidth = 144
+    TabOrder = 0
+    object lblTools: TLabel
+      Left = 8
+      Height = 15
+      Top = 8
+      Width = 79
+      Caption = 'Инструменты:'
+      ParentColor = False
+    end
+    object lstTools: TListBox
+      Left = 0
+      Height = 152
+      Top = 24
+      Width = 144
+      ExtendedSelect = False
+      ItemHeight = 0
+      OnSelectionChange = lstToolsSelectionChange
+      TabOrder = 0
+    end
+    object ToolParamsPanel: TPanel
+      Left = 0
+      Height = 394
+      Top = 208
+      Width = 144
+      Anchors = [akTop, akLeft, akBottom]
+      TabOrder = 1
+      OnClick = ToolParamsPanelClick
+    end
+    object spnZoom: TFloatSpinEdit
+      Left = 0
+      Height = 23
+      Top = 184
+      Width = 144
+      Increment = 1
+      MaxValue = 1000
+      MinValue = 1
+      OnChange = spnZoomChange
+      OnKeyPress = spnZoomKeyPress
+      TabOrder = 2
+      Value = 1
+    end
+    object Memo1: TMemo
+      Left = 0
+      Height = 178
+      Top = 208
+      Width = 144
+      TabOrder = 3
+      Visible = False
+    end
+  end
+  object PaintBox: TPaintBox
+    AnchorSideLeft.Control = ToolBox
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = VerticalBar
+    AnchorSideBottom.Control = HorizontalBar
+    Cursor = crCross
+    Left = 144
+    Height = 588
+    Top = 0
+    Width = 567
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Color = clWhite
+    ParentColor = False
+    OnMouseDown = PaintBoxMouseDown
+    OnMouseMove = PaintBoxMouseMove
+    OnMouseUp = PaintBoxMouseUp
+    OnPaint = PaintBoxPaint
+  end
+  object HorizontalBar: TScrollBar
+    AnchorSideLeft.Control = PaintBox
+    AnchorSideTop.Control = PaintBox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = PaintBox
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 144
+    Height = 17
+    Top = 588
+    Width = 567
+    Anchors = [akLeft, akRight, akBottom]
+    PageSize = 0
+    TabOrder = 1
+    OnScroll = HorizontalBarScroll
+  end
+  object VerticalBar: TScrollBar
+    AnchorSideLeft.Side = asrCenter
+    AnchorSideTop.Control = PaintBox
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = PaintBox
+    AnchorSideBottom.Side = asrBottom
+    Left = 711
+    Height = 588
+    Top = 0
+    Width = 21
+    Anchors = [akTop, akRight, akBottom]
+    Kind = sbVertical
+    PageSize = 0
+    TabOrder = 2
+    OnScroll = VerticalBarScroll
+  end
+  object MainMenu: TMainMenu
+    left = 544
+    top = 64
+    object miFile: TMenuItem
+      Caption = 'Файл'
+      object SaveClick: TMenuItem
+        Caption = 'Сохранить'
+        OnClick = SaveClickClick
+      end
+      object Open: TMenuItem
+        Caption = 'Открыть'
+        OnClick = OpenClick
+      end
+      object miExit: TMenuItem
+        Caption = 'Выход'
+      end
+    end
+    object miEdit: TMenuItem
+      Caption = 'Правка'
+      object miClearImage: TMenuItem
+        Caption = 'Очистить изображение'
+        OnClick = miClearImageClick
+      end
+      object SelectAll: TMenuItem
+        Caption = 'Выделить всё'
+        OnClick = SelectAllClick
+      end
+      object Deselect: TMenuItem
+        Caption = 'Снять выделение'
+        OnClick = DeselectClick
+      end
+      object Background: TMenuItem
+        Caption = 'Переместить на задний фон'
+        OnClick = MoveBack
+      end
+      object Forefront: TMenuItem
+        Caption = 'Переместить на передний план'
+        OnClick = MoveFrfront
+      end
+      object DeleteBtn: TMenuItem
+        Caption = 'Удалить'
+        OnClick = DeleteBtnClick
+      end
+    end
+    object miHelp: TMenuItem
+      Caption = 'Справка'
+      object miAbout: TMenuItem
+        Caption = 'О программе'
+        OnClick = miAboutClick
+      end
+    end
+  end
+  object OpenDialog: TOpenDialog
+    Title = 'Открыть шедевр современого искусства'
+    DefaultExt = '.json'
+    Filter = 'Редактируемые файлы|*.json|Все файлы|*'
+    left = 478
+    top = 72
+  end
+  object SaveDialog: TSaveDialog
+    Title = 'Не забудь сохранить свой шедевр!'
+    Filter = 'Умненький json|*.json|Остальное|.'
+    left = 430
+    top = 91
+  end
+end

@@ -1,6 +1,7 @@
 unit Main;
 
 {$MODE OBJFPC}
+{$H+}{$R+}
 {$LONGSTRINGS ON}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -11,24 +12,32 @@ interface
 
 uses
   Classes, SysUtils, Graphics, GraphMath, math,
-  Forms, Dialogs, Menus, Buttons,
+  Forms, Dialogs, Menus, Buttons, Fpjson,
   Controls, ExtCtrls, StdCtrls, Spin,
   EditorTools, ToolsParams, Transform, CanvasFigures;
 
+
 type
+
+  TPointArray = array of TPoint;
 
   { TMainForm }
 
   TMainForm = class(TForm)
-		Deselect: TMenuItem;
-		DeleteBtn: TMenuItem;
-		Background: TMenuItem;
-		Forefront: TMenuItem;
-		SelectAll: TMenuItem;
-		spnZoom: TFloatSpinEdit;
-		HorizontalBar: TScrollBar;
-		VerticalBar: TScrollBar;
-		ToolParamsPanel: TPanel;
+    Deselect: TMenuItem;
+    DeleteBtn: TMenuItem;
+    Background: TMenuItem;
+    Forefront: TMenuItem;
+    Memo1: TMemo;
+    SaveClick: TMenuItem;
+    Open: TMenuItem;
+    OpenDialog: TOpenDialog;
+    SaveDialog: TSaveDialog;
+    SelectAll: TMenuItem;
+    spnZoom: TFloatSpinEdit;
+    HorizontalBar: TScrollBar;
+    VerticalBar: TScrollBar;
+    ToolParamsPanel: TPanel;
     ToolBox: TPanel;
     lblTools: TLabel;
     lstTools: TListBox;
@@ -41,15 +50,18 @@ type
     miHelp: TMenuItem;
     miAbout: TMenuItem;
 
-   	procedure DeleteBtnClick(Sender: TObject);
-	  procedure DeselectClick(Sender: TObject);
-		procedure MoveBack(Sender: TObject);
-		procedure MoveFrfront(Sender: TObject);
-		procedure SelectAllClick(Sender: TObject);
-	  procedure spnZoomChange(Sender: TObject);
+    procedure DeleteBtnClick(Sender: TObject);
+    procedure DeselectClick(Sender: TObject);
+    procedure MoveBack(Sender: TObject);
+    procedure MoveFrfront(Sender: TObject);
+    procedure OpenClick(Sender: TObject);
+    procedure SaveClickClick(Sender: TObject);
+    procedure SelectAllClick(Sender: TObject);
+    procedure spnZoomChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-		procedure HorizontalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
-			var ScrollPos: Integer);
+    procedure OpenHere();
+    procedure HorizontalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
+	    var ScrollPos: Integer);
     procedure PaintBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer);
     procedure PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -61,10 +73,11 @@ type
     procedure miAboutClick(Sender: TObject);
     procedure ChangeBorders();
     procedure SetScrollBar();
-		procedure spnZoomKeyPress(Sender: TObject; var Key: char);
-		procedure VerticalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
-			var ScrollPos: Integer);
-
+    procedure spnZoomKeyPress(Sender: TObject; var Key: char);
+    procedure ToolParamsPanelClick(Sender: TObject);
+    procedure VerticalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
+      var ScrollPos: Integer);
+    function IntToColor(Value:Integer):TColor;
   strict private
     fCurrentToolClass: TEditorToolClass;
     fCurrentFigureIndex: SizeInt;
@@ -94,11 +107,56 @@ var
   i: SizeInt;
 begin
   Caption := Application.Title;
+
   for i := 0 to EditorToolsCount()-1 do
     lstTools.Items.Add(GetEditorTool(i).GetName());
+
   lstTools.ItemIndex := 0;
   fCurrentFigureIndex := cFigureIndexInvalid;
   SetScrollBar();
+end;
+
+procedure TMainForm.OpenHere();
+var
+  f: TFileStream;
+  i, k:integer;
+  FName, ClassNames: String;
+  J: TJSONData;
+  FFigureArray: array of TCanvasFigure;
+  jArray, jPoints: TJSONArray;
+  s:TColor;
+begin
+  if OpenDialog.Execute then
+  begin
+    FName:= OpenDialog.FileName;
+    f := TFileStream.Create(FName, fmOpenRead or fmShareDenyWrite);
+    J := GetJSON(f);
+    jArray := TJSONArray(J.FindPath('pbox'));
+    SetLength(FFigureArray, jArray.Count);
+    for i := 0 to jArray.Count - 1 do begin
+      ClassNames := jArray.Objects[i].FindPath('FigureClass').AsString;
+      FFigureArray[i] := GetFigure(AddFigure(StrToClassFigure(ClassNames)));
+      jPoints := TJSONArray(jArray.Objects[i].FindPath('Points'));
+      for k := 0 to jPoints.Count-1 do begin
+        FFigureArray[i].AddPoint(FloatPoint(jPoints.Arrays[k].Floats[0],
+        jPoints.Arrays[k].Floats[1]));
+      end;
+        FFigureArray[i].PenColor :=
+           jArray.Objects[i].FindPath('FigurePenColor').AsInteger;
+         FFigureArray[i].BrushColor :=
+           jArray.Objects[i].FindPath('FigureBrushColor').AsInteger;
+         FFigureArray[i].Width :=
+           jArray.Objects[i].FindPath('FigureWidth').AsInteger;
+         FFigureArray[i].Radius :=
+           jArray.Objects[i].FindPath('FigureRadius').AsInteger;
+         FFigureArray[i].PenStyle :=
+           NumToStyle(jArray.Objects[i].FindPath('FigurePenStyle').AsInteger);
+         FFigureArray[i].BrushStyle :=
+           NumToBrushStyle(jArray.Objects[i].FindPath('FigureBrushStyle').AsInteger);
+    end;
+    FreeAndNil(f);
+  end;
+  Invalidate();
 end;
 
 procedure TMainForm.spnZoomChange(Sender: TObject);
@@ -133,6 +191,70 @@ begin
   PaintBox.Invalidate();
 end;
 
+procedure TMainForm.OpenClick(Sender: TObject);
+var
+  buttonSelected: integer;
+begin
+  UnSelectAll();
+  Invalidate;
+  buttonSelected := MessageDlg(Open.Caption, 'Открыть в этом проекте?',
+    mtCustom, [mbYes, mbNo, mbIgnore], 0);
+  if buttonSelected = 7 then begin
+    ClearFigures();
+    PaintBox.Invalidate();
+  end;
+  OpenHere();
+end;
+
+
+procedure TMainForm.SaveClickClick(Sender: TObject);
+var
+  i, j, len:integer;
+  Points:TPointArray;
+  jObject, jFigure: TJSONObject;
+  jArray, jSecArray: TJSONArray;
+  FName: String;
+begin
+  SaveDialog.FileName := 'My perfect project';
+  if SaveDialog.Execute then begin
+    jObject := TJSONObject.Create;
+    jObject.Add('pbox', TJSONArray.Create);
+    for i:= 0 to FiguresCount()-1 do
+    begin
+      jFigure := TJSONObject.Create;
+        jFigure.Add('FigureClass', GetFigure(i).ClassName);
+	Points := GetFigure(i).GetCanvasPoints();
+        len := Length(Points) - 1;
+        jArray := TJSONArray.Create;
+        for j := 0 to len do begin
+          jSecArray := TJSONArray.Create;
+          jSecArray.Add(Points[j].x);
+          jSecArray.Add(Points[j].y);
+          jArray.Add(jSecArray);
+        end;
+        jFigure.Add('Points',jArray);
+        if (GetFigure(i).ClassName <> 'FFigureEmpty')
+        and (GetFigure(i).ClassName <> 'FFigureAllotment') then begin
+
+          jFigure.Add('FigurePenColor', GetFigure(i).PenColor);
+          jFigure.Add('FigurePenStyle',  StyleToNum(GetFigure(i).PenStyle));
+          jFigure.Add('FigureWidth', GetFigure(i).Width);
+          jFigure.Add('FigureBrushColor', GetFigure(i).BrushColor);
+          jFigure.Add('FigureBrushStyle',BrushStyleToNum(GetFigure(i).BrushStyle));
+          jFigure.Add('FigureRadius', GetFigure(i).Radius);
+
+        end;
+        jObject.Arrays['pbox'].Add(jFigure);
+    end;
+    FName:= SaveDialog.FileName;
+    Memo1.Lines.Add(jObject.FormatJSON);
+    Memo1.Lines.SaveToFile(FName);
+    UnSelectAll();
+    Invalidate;
+  end;
+  SaveDialog.Free;
+end;
+
 procedure TMainForm.SelectAllClick(Sender: TObject);
 begin
   PSelectAll();
@@ -151,7 +273,7 @@ end;
 //work with Scroll
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-procedure TMainForm.ChangeBorders;
+procedure TMainForm.ChangeBorders();
 var
   i: SizeInt;
 begin
@@ -176,8 +298,8 @@ begin
 	end;
 end;
 
-procedure TMainForm.HorizontalBarScroll(Sender: TObject;
-	ScrollCode: TScrollCode; var ScrollPos: Integer);
+procedure TMainForm.HorizontalBarScroll(Sender: TObject;ScrollCode: TScrollCode;
+var ScrollPos: Integer);
 begin
   ScreenOffset.X := HorizontalBar.Position;
   PaintBox.Invalidate();
@@ -187,10 +309,15 @@ procedure TMainForm.VerticalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
 	var ScrollPos: Integer);
 begin
   ScreenOffset.Y := VerticalBar.Position;
-  PaintBox.Invalidate();
+  Invalidate();
 end;
 
-procedure TMainForm.SetScrollBar;
+function TMainForm.IntToColor(Value: Integer): TColor;
+begin
+  Result:=Value;
+end;
+
+procedure TMainForm.SetScrollBar();
 var
   ScreenRightEnd: TFloatPoint;
   HorizMin, HorizMax, VertMin, VertMax: integer;
@@ -203,12 +330,12 @@ begin
 
   if FiguresCount() > 0 then
   begin
-	  ChangeBorders();
-	  HorizMin := Min(HorizMin, Round(WorldTopLeft.x));
-	  VertMin := Min(VertMin, Round(WorldTopLeft.y));
-	  HorizMax := Max(HorizMax, Round(WorldBottomRight.x));
-	  VertMax := Max(VertMax, Round(WorldBottomRight.y));
-	end;
+    ChangeBorders();
+    HorizMin := Min(HorizMin, Round(WorldTopLeft.x));
+    VertMin := Min(VertMin, Round(WorldTopLeft.y));
+    HorizMax := Max(HorizMax, Round(WorldBottomRight.x));
+    VertMax := Max(VertMax, Round(WorldBottomRight.y));
+  end;
 
   HorizontalBar.SetParams(Round(ScreenOffset.x), HorizMin, HorizMax,
   Round(PaintBox.Width / Zoom));
@@ -227,22 +354,21 @@ begin
   SetButton(Button);
   if Button = mbLeft then begin
 
+    if fCurrentToolClass = nil then
+      exit;
 
-  if fCurrentToolClass = nil then
-    exit;
+    if ((FCurrentToolClass) <> (TToolZoom))
+    and ((FCurrentToolClass) <> (TToolAllocator))
+    and ((FCurrentToolClass) <> (TToolHand))
+    and ((FCurrentToolClass) <> (TToolCursor))then
+      UnSelectAll();
 
-  if ((FCurrentToolClass) <> (TToolZoom))
-  and ((FCurrentToolClass) <> (TToolAllocator))
-  and ((FCurrentToolClass) <> (TToolHand))
-  and ((FCurrentToolClass) <> (TToolCursor))then
-    UnSelectAll();
-
-  fCurrentFigureIndex := AddFigure(fCurrentToolClass.GetFigureClass());
-  fCurrentToolClass.SetFigureParams(fCurrentFigureIndex);
-  fCurrentToolClass.Start(fCurrentFigureIndex, Point(X, Y));
-  PaintBox.Invalidate();
-  SetScrollBar();
-end
+    fCurrentFigureIndex := AddFigure(fCurrentToolClass.GetFigureClass());
+    fCurrentToolClass.SetFigureParams(fCurrentFigureIndex);
+    fCurrentToolClass.Start(fCurrentFigureIndex, Point(X, Y));
+    Invalidate();
+    SetScrollBar();
+  end
 end;
 
 procedure TMainForm.PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -250,7 +376,7 @@ begin
   if fCurrentToolClass = nil then
     exit;
   if fCurrentToolClass.Update(fCurrentFigureIndex, Point(X, Y)) then
-    PaintBox.Invalidate();
+    Invalidate();
   SetScrollBar();
 end;
 
@@ -263,7 +389,7 @@ begin
   begin
     if fCurrentToolClass.Finish(fCurrentFigureIndex) then begin
       fCurrentFigureIndex := cFigureIndexInvalid;
-      PaintBox.Invalidate();
+      Invalidate();
     end;
   end;
 end;
@@ -280,10 +406,11 @@ begin
   spnZoom.Value := double(Zoom * 100);
   PaintBox.Canvas.Clear();
   for i := 0 to FiguresCount()-1 do
-    GetFigure(i).Draw(PaintBox.Canvas);
+    if GetFigure(i) <> nil then
+      GetFigure(i).Draw(PaintBox.Canvas);
   for count:= 0 to FiguresCount()-1 do begin
     GetFigure(count).DrawSelection(PaintBox.Canvas);
-	end;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -331,10 +458,14 @@ begin
   );
 end;
 
-
 procedure TMainForm.spnZoomKeyPress(Sender: TObject; var Key: char);
 begin
   Key:=#0;
+end;
+
+procedure TMainForm.ToolParamsPanelClick(Sender: TObject);
+begin
+
 end;
 
 end.

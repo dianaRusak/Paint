@@ -10,12 +10,12 @@ uses
 type
 
 TToolParam = class
-	private
-	  FName:string;
-	  procedure ChangeControl(Sender: TObject); virtual; abstract;
-	public
-	  property Name: string read FName;
-    function ToControl(AParentPanel: TPanel):TControl; virtual; abstract;
+  private
+    FName:string;
+    procedure ChangeControl(Sender: TObject); virtual; abstract;
+  public
+    property Name: string read FName;
+  function ToControl(AParentPanel: TPanel):TControl; virtual; abstract;
 end;
 
 TToolParamsList = array of TToolParam;
@@ -23,89 +23,89 @@ TToolParamsList = array of TToolParam;
 {TColorLineParam }
 
 TColorLineParam = class(TToolParam)
-	private
-	  fColorLine: TColor;
-	  procedure ChangeControl(Sender: TObject); override;
-	public
-	  property Value: TColor read fColorLine;
-	  constructor Create;
-	  function ToControl(AParentPanel: TPanel): TControl; override;
+  private
+    fColorLine: TColor;
+    procedure ChangeControl(Sender: TObject); override;
+  public
+    property Value: TColor read fColorLine;
+    constructor Create;
+    function ToControl(AParentPanel: TPanel): TControl; override;
 end;
 
 { TColorBrushParam }
 
 TColorBrushParam = class(TToolParam)
-	private
-	  fColorBrush: TColor;
-	  procedure ChangeControl(Sender: TObject); override;
-	public
-	  property Value: TColor read fColorBrush;
-	  constructor Create;
-	  function ToControl(AParentPanel: TPanel): TControl; override;
+  private
+    fColorBrush: TColor;
+    procedure ChangeControl(Sender: TObject); override;
+  public
+    property Value: TColor read fColorBrush;
+    constructor Create;
+    function ToControl(AParentPanel: TPanel): TControl; override;
 end;
 
 
 { TFillStyleParam }
 
 TFillStyleParam = class(TToolParam)
-	private
-	 FFillIndex: integer;
-	 const FFillStyles: array[0..7] of TBrushStyle = (bsSolid, bsClear,
-	 bsHorizontal, bsVertical, bsFDiagonal, bsBDiagonal, bsCross, bsDiagCross);
-	 function fGetFillStyle: TBrushStyle;
-	 procedure ChangeControl(Sender: TObject); override;
-	 procedure fDrawItem(Control: TWinControl; Index: Integer; ARect: TRect;
-	   State: TOwnerDrawState);
-  public
-	  property Value: TBrushStyle read fGetFillStyle;
-	  constructor Create;
-	  function ToControl(AParentPanel: TPanel): TControl; override;
-	end;
+  private
+    FFillIndex: integer;
+    const FFillStyles: array[0..7] of TBrushStyle = (bsSolid, bsClear,
+    bsHorizontal, bsVertical, bsFDiagonal, bsBDiagonal, bsCross, bsDiagCross);
+    function fGetFillStyle: TBrushStyle;
+    procedure ChangeControl(Sender: TObject); override;
+    procedure fDrawItem(Control: TWinControl; Index: Integer; ARect: TRect;
+      State: TOwnerDrawState);
+public
+  property Value: TBrushStyle read fGetFillStyle;
+  constructor Create;
+  function ToControl(AParentPanel: TPanel): TControl; override;
+end;
 
 { TWidthLineParam }
 
 TWidthLineParam = class(TToolParam)
-	private
-		fWidthLine: TWidth;
-	  procedure ChangeControl(Sender: TObject); override;
-	public
-	  property Value: TWidth read fWidthLine;
-	  constructor Create;
-	  function ToControl(AParentPanel: TPanel): TControl; override;
-	end;
+private
+  fWidthLine: TWidth;
+  procedure ChangeControl(Sender: TObject); override;
+public
+  property Value: TWidth read fWidthLine;
+  constructor Create;
+  function ToControl(AParentPanel: TPanel): TControl; override;
+end;
 
 { TStyleLineParam }
 TStyleLineParam = class(TToolParam)
-	private
-	  FLineIndex: integer;
-	  const fStylesLine: array[0..5] of TPenStyle = (psSolid, psClear, psDot, psDash,
-	    psDashDot, psDashDotDot);
-{
-  'Сплошной'; psSolid),
-  'Прерывистый'; psDash),
-  'Точечный'; psDot),
-  'Точка-тире'; psDashDot),
-  'Точка-точка-тире' psDashDotDot)
-}
+  private
+    FLineIndex: integer;
+    const fStylesLine: array[0..5] of TPenStyle = (psSolid, psClear, psDot, psDash,
+      psDashDot, psDashDotDot);
+  {
+    'Сплошной'; psSolid),
+    'Прерывистый'; psDash),
+    'Точечный'; psDot),
+    'Точка-тире'; psDashDot),
+    'Точка-точка-тире' psDashDotDot)
+  }
     function fGetLineStyle: TPenStyle;
     procedure ChangeControl(Sender: TObject); override;
     procedure FDrawItem(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState);
   public
-	  property Value: TPenStyle read fGetLineStyle;
-	  constructor Create;
-	  function ToControl(AParentPanel: TPanel): TControl; override;
+    property Value: TPenStyle read fGetLineStyle;
+    constructor Create;
+    function ToControl(AParentPanel: TPanel): TControl; override;
 end;
 
 { TRadiusParam }
 
 TRadiusParam = class(TToolParam)
-	private
-		fRadius: integer;
-	  procedure ChangeControl(Sender: TObject); override;
-	public
-	  property Value: integer read fRadius;
-	  constructor Create;
-	  function ToControl(AParentPanel: TPanel): TControl; override;
+  private
+    fRadius: integer;
+    procedure ChangeControl(Sender: TObject); override;
+  public
+    property Value: integer read fRadius;
+    constructor Create;
+    function ToControl(AParentPanel: TPanel): TControl; override;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,14 +130,14 @@ end;
 function TColorBrushParam.ToControl(AParentPanel: TPanel): TControl;
 begin
   Result := TColorBox.Create(AParentPanel);
-    with Result as TColorBox do
-    begin
-      Parent := AParentPanel;
-      ColorRectWidth := 10;
-      Style := [cbCustomColor, cbExtendedColors, cbPrettyNames, cbStandardColors];
-      Selected := fColorBrush;
-      OnSelect := @ChangeControl;
-    end;
+  with Result as TColorBox do
+  begin
+    Parent := AParentPanel;
+    ColorRectWidth := 10;
+    Style := [cbCustomColor, cbExtendedColors, cbPrettyNames, cbStandardColors];
+    Selected := fColorBrush;
+    OnSelect := @ChangeControl;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,19 +155,19 @@ begin
 end;
 
 procedure TFillStyleParam.fDrawItem(Control: TWinControl; Index: Integer;
-	ARect: TRect; State: TOwnerDrawState);
+  ARect: TRect; State: TOwnerDrawState);
 begin
   with (Control as TComboBox).Canvas do
-    begin
-      FillRect(ARect);
-      Pen.Color := clBlack;
-      Pen.Style := psClear;
-      Pen.Width := 1;
-      Brush.Style := FFillStyles[Index];
-      if Brush.Style <> bsClear then
-        Brush.Color := clPurple;
-      Rectangle(ARect.Left + 1, ARect.Top + 1, ARect.Right - 1,ARect.Bottom - 1);
-    end;
+  begin
+    FillRect(ARect);
+    Pen.Color := clBlack;
+    Pen.Style := psClear;
+    Pen.Width := 1;
+    Brush.Style := FFillStyles[Index];
+    if Brush.Style <> bsClear then
+      Brush.Color := clBlack;
+    Rectangle(ARect.Left + 1, ARect.Top + 1, ARect.Right - 1,ARect.Bottom - 1);
+  end;
 end;
 
 constructor TFillStyleParam.Create;
@@ -242,12 +242,12 @@ procedure TStyleLineParam.FDrawItem(Control: TWinControl; Index: Integer;
 	ARect: TRect; State: TOwnerDrawState);
 begin
   with (Control as TComboBox).Canvas do
-   begin
-     FillRect(ARect);
-     Pen.Color := clBlack;
-     Pen.Style := fStylesLine[Index];
-     Pen.Width := 1;
-     Line(ARect.Left + 1, (ARect.Top + ARect.Bottom) div 2, ARect.Right - 1,
+  begin
+    FillRect(ARect);
+    Pen.Color := clBlack;
+    Pen.Style := fStylesLine[Index];
+    Pen.Width := 1;
+    Line(ARect.Left + 1, (ARect.Top + ARect.Bottom) div 2, ARect.Right - 1,
        (ARect.Top + ARect.Bottom) div 2);
    end;
 end;
@@ -298,15 +298,15 @@ end;
 function TRadiusParam.ToControl(AParentPanel: TPanel): TControl;
 begin
   Result := TTrackBar.Create(AParentPanel);
-    with Result as TTrackBar do
-    begin
-      OnChange := @ChangeControl;
-      Parent := AParentPanel;
-      Min := 5;
-      Max := 50;
-      PageSize := 1;
-      Position := fRadius;
-    end;
+  with Result as TTrackBar do
+  begin
+    OnChange := @ChangeControl;
+    Parent := AParentPanel;
+    Min := 5;
+    Max := 50;
+    PageSize := 1;
+    Position := fRadius;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

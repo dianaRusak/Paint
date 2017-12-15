@@ -1,7 +1,6 @@
 $cat .gitignore
 *.exe
 *.lps
-*.lfm
 *.res
 
 /lib

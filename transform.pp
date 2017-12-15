@@ -58,12 +58,12 @@ end;
 
 procedure SetZoom(aZoom: double);
 begin
-	if aZoom <= 0.01 then
-  	Zoom := 0.01
-	else if aZoom >= 100 then
-	  Zoom := 10
-	else
-  	Zoom := aZoom;
+  if aZoom <= 0.01 then
+  Zoom := 0.01
+  else if aZoom >= 100 then
+    Zoom := 10
+  else
+  Zoom := aZoom;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
