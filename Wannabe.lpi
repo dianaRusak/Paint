@@ -35,7 +35,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="7">
+    <Units Count="8">
       <Unit0>
         <Filename Value="Wannabe.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -72,6 +72,11 @@
         <Filename Value="superobject.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit6>
+      <Unit7>
+        <Filename Value="undoredo.pp"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UndoRedo"/>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

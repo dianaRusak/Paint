@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 968
+  Left = 494
   Height = 625
-  Top = 95
+  Top = 75
   Width = 732
   ClientHeight = 605
   ClientWidth = 732
@@ -144,6 +144,16 @@ object MainForm: TMainForm
     end
     object miEdit: TMenuItem
       Caption = 'Правка'
+      object miUndo: TMenuItem
+        Caption = 'Отменить'
+        ShortCut = 16474
+        OnClick = miUndoClick
+      end
+      object miRedo: TMenuItem
+        Caption = 'Вернуть'
+        ShortCut = 16473
+        OnClick = miRedoClick
+      end
       object miClearImage: TMenuItem
         Caption = 'Очистить изображение'
         OnClick = miClearImageClick

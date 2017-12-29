@@ -13,7 +13,7 @@ interface
 uses
   Classes, SysUtils, Graphics, GraphMath, math,
   Forms, Dialogs, Menus, Buttons, Fpjson,
-  Controls, ExtCtrls, StdCtrls, Spin,
+  Controls, ExtCtrls, StdCtrls, Spin, UndoRedo,
   EditorTools, ToolsParams, Transform, CanvasFigures;
 
 
@@ -29,6 +29,8 @@ type
     Background: TMenuItem;
     Forefront: TMenuItem;
     Memo1: TMemo;
+    miRedo: TMenuItem;
+    miUndo: TMenuItem;
     SaveClick: TMenuItem;
     Open: TMenuItem;
     OpenDialog: TOpenDialog;
@@ -52,6 +54,8 @@ type
 
     procedure DeleteBtnClick(Sender: TObject);
     procedure DeselectClick(Sender: TObject);
+    procedure miRedoClick(Sender: TObject);
+    procedure miUndoClick(Sender: TObject);
     procedure MoveBack(Sender: TObject);
     procedure MoveFrfront(Sender: TObject);
     procedure OpenClick(Sender: TObject);
@@ -114,6 +118,9 @@ begin
   lstTools.ItemIndex := 0;
   fCurrentFigureIndex := cFigureIndexInvalid;
   SetScrollBar();
+  miUndo.Enabled := CanUndo;
+  miRedo.Enabled := CanRedo;
+  AddUndoRedo;
 end;
 
 procedure TMainForm.OpenHere();
@@ -179,15 +186,35 @@ begin
   PaintBox.Invalidate();
 end;
 
+procedure TMainForm.miRedoClick(Sender: TObject);
+begin
+  if CanRedo then
+    Redo;
+  miUndo.Enabled := CanUndo;
+  miRedo.Enabled := CanRedo;
+  Invalidate;
+end;
+
+procedure TMainForm.miUndoClick(Sender: TObject);
+begin
+  if CanUndo then
+    Undo;
+  miUndo.Enabled := CanUndo;
+  miRedo.Enabled := CanRedo;
+  Invalidate;
+end;
+
 procedure TMainForm.MoveBack(Sender: TObject);
 begin
   MoveBackground;
+  AddUndoRedo();
   PaintBox.Invalidate();
 end;
 
 procedure TMainForm.MoveFrfront(Sender: TObject);
 begin
   MoveForefront;
+  AddUndoRedo();
   PaintBox.Invalidate();
 end;
 
@@ -198,8 +225,10 @@ begin
   UnSelectAll();
   Invalidate;
   buttonSelected := MessageDlg(Open.Caption, 'Открыть в этом проекте?',
-    mtCustom, [mbYes, mbNo, mbIgnore], 0);
-  if buttonSelected = 7 then begin
+    mtCustom, [mbYes, mbNo, mbCancel], 0);
+  if buttonSelected = mrCancel then
+    exit;
+  if buttonSelected = mrNo then begin
     ClearFigures();
     PaintBox.Invalidate();
   end;
@@ -215,7 +244,6 @@ var
   jArray, jSecArray: TJSONArray;
   FName: String;
 begin
-  SaveDialog.FileName := 'My perfect project';
   if SaveDialog.Execute then begin
     jObject := TJSONObject.Create;
     jObject.Add('pbox', TJSONArray.Create);
@@ -252,7 +280,6 @@ begin
     UnSelectAll();
     Invalidate;
   end;
-  SaveDialog.Free;
 end;
 
 procedure TMainForm.SelectAllClick(Sender: TObject);
@@ -264,6 +291,7 @@ end;
 procedure TMainForm.DeleteBtnClick(Sender: TObject);
 begin
   DeleteSelected();
+  AddUndoRedo();
   PaintBox.Invalidate();
   UnSelectAll();
 end;
@@ -392,6 +420,8 @@ begin
       Invalidate();
     end;
   end;
+  miUndo.Enabled := CanUndo;
+  miRedo.Enabled := CanRedo;
 end;
 
 //end
@@ -447,6 +477,7 @@ begin
     ClearFigures();
     PaintBox.Invalidate();
   end;
+  AddUndoRedo();
 end;
 
 procedure TMainForm.miAboutClick(Sender: TObject);

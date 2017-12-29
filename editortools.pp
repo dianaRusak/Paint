@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Transform, Controls, GraphMath,
-  CanvasFigures, ToolsParams;
+  CanvasFigures, ToolsParams, UndoRedo;
 
 type
 
@@ -294,7 +294,7 @@ end;
 
 class function TToolCursor.Finish(aFigureIndex: SizeInt): Boolean;
 begin
-  Result := inherited Finish(aFigureIndex);
+  Result := aFigureIndex <> cFigureIndexInvalid;
   fCanDraw := False;
   fCanResiz := False;
   DeleteFigure(AFigureIndex);
@@ -390,7 +390,7 @@ end;
 
 class function TToolZoom.Finish(aFigureIndex: SizeInt): Boolean;
 begin
-  Result := inherited Finish(AFigureIndex);
+  Result := aFigureIndex <> cFigureIndexInvalid;
   DeleteFigure(AFigureIndex);
 end;
 
@@ -474,6 +474,7 @@ end;
 class function TEditorTool.Finish(aFigureIndex: SizeInt): Boolean;
 begin
   Result := aFigureIndex <> cFigureIndexInvalid;
+  AddUndoRedo();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

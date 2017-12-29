@@ -141,6 +141,7 @@ var
   beginingRun: Boolean;
   aMin, aMax: TFloatPoint;
   FigureLeft, FigureRight: TPoint;
+  FiguresData: array of TCanvasFigure;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,10 +153,6 @@ implementation
 
 uses
   EditorTools;
-
-var
-  FiguresData: array of TCanvasFigure;
-
 
 function AddFigure(aFigureClass: TCanvasFigureClass): SizeInt;
 begin
@@ -189,7 +186,7 @@ begin
   Result := Length(FiguresData);
 end;
 
-procedure PSelectAll;
+procedure PSelectAll();
 var
   i:SizeInt;
 begin
@@ -199,7 +196,7 @@ begin
   end;
 end;
 
-procedure UnSelectAll;
+procedure UnSelectAll();
 var
   i:SizeInt;
 begin
@@ -209,7 +206,7 @@ begin
   end;
 end;
 
-procedure DeleteSelected;
+procedure DeleteSelected();
 var
   i, j, k: SizeInt;
 begin
@@ -230,7 +227,7 @@ begin
   SetLength(FiguresData, Length(FiguresData) - j);
 end;
 
-procedure MoveForefront;
+procedure MoveForefront();
 var
   i: SizeInt;
   t: TCanvasFigure;
@@ -246,7 +243,7 @@ begin
   end;
 end;
 
-procedure MoveBackground;
+procedure MoveBackground();
 var
   i: SizeInt;
   t: TCanvasFigure;
