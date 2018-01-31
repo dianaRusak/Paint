@@ -154,6 +154,21 @@ object MainForm: TMainForm
         ShortCut = 16473
         OnClick = miRedoClick
       end
+      object miCutSelected: TMenuItem
+        Caption = 'Вырезать'
+        ShortCut = 16472
+        OnClick = miCutSelectedClick
+      end
+      object miCopySelected: TMenuItem
+        Caption = 'Копировать'
+        ShortCut = 16451
+        OnClick = miCopySelectedClick
+      end
+      object miPasteSelected: TMenuItem
+        Caption = 'Вставить'
+        ShortCut = 16470
+        OnClick = miPasteSelectedClick
+      end
       object miClearImage: TMenuItem
         Caption = 'Очистить изображение'
         OnClick = miClearImageClick

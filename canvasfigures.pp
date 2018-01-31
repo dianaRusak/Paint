@@ -118,10 +118,12 @@ public
 end;
 
 TCanvasFigureClass = class of TCanvasFigure;
+TCanvasFigures = array of TCanvasFigure;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function AddFigure(aFigureClass: TCanvasFigureClass): SizeInt;
+function AddFigure(aFigure: TCanvasFigure): SizeInt;
 procedure DeleteFigure(aIndex: SizeInt);
 procedure ClearFigures();
 function GetFigure(aIndex: SizeInt): TCanvasFigure;
@@ -159,6 +161,13 @@ begin
   Result := Length(FiguresData);
   SetLength(FiguresData, Result+1);
   FiguresData[Result] := aFigureClass.Create();
+end;
+
+function AddFigure(aFigure: TCanvasFigure): SizeInt;
+begin
+  Result := Length(FiguresData);
+  SetLength(FiguresData, Result+1);
+  FiguresData[Result] := aFigure;
 end;
 
 procedure DeleteFigure(aIndex: SizeInt);

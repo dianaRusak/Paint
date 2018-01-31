@@ -14,7 +14,8 @@ uses
   Classes, SysUtils, Graphics, GraphMath, math,
   Forms, Dialogs, Menus, Buttons, Fpjson,
   Controls, ExtCtrls, StdCtrls, Spin, UndoRedo,
-  EditorTools, ToolsParams, Transform, CanvasFigures;
+  EditorTools, ToolsParams, Transform, CanvasFigures,
+  LCLType, Clipbrd;
 
 
 type
@@ -29,6 +30,9 @@ type
     Background: TMenuItem;
     Forefront: TMenuItem;
     Memo1: TMemo;
+    miCutSelected: TMenuItem;
+    miCopySelected: TMenuItem;
+    miPasteSelected: TMenuItem;
     miRedo: TMenuItem;
     miUndo: TMenuItem;
     SaveClick: TMenuItem;
@@ -54,6 +58,9 @@ type
 
     procedure DeleteBtnClick(Sender: TObject);
     procedure DeselectClick(Sender: TObject);
+    procedure miCopySelectedClick(Sender: TObject);
+    procedure miCutSelectedClick(Sender: TObject);
+    procedure miPasteSelectedClick(Sender: TObject);
     procedure miRedoClick(Sender: TObject);
     procedure miUndoClick(Sender: TObject);
     procedure MoveBack(Sender: TObject);
@@ -65,7 +72,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure OpenHere();
     procedure HorizontalBarScroll(Sender: TObject; ScrollCode: TScrollCode;
-	    var ScrollPos: Integer);
+      var ScrollPos: Integer);
     procedure PaintBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer);
     procedure PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -85,6 +92,8 @@ type
   strict private
     fCurrentToolClass: TEditorToolClass;
     fCurrentFigureIndex: SizeInt;
+    function SaveToJSON(OnlySelected: Boolean): TJSONObject;
+    function ReadFromJSON(J: TJSONObject): TCanvasFigures;
   end;
 
 var
@@ -126,40 +135,19 @@ end;
 procedure TMainForm.OpenHere();
 var
   f: TFileStream;
-  i, k:integer;
-  FName, ClassNames: String;
-  J: TJSONData;
-  FFigureArray: array of TCanvasFigure;
-  jArray, jPoints: TJSONArray;
-  s:TColor;
+  FName: String;
+  FFigureArray: TCanvasFigures;
+  J: TJSONObject;
+  i: TCanvasFigure;
 begin
   if OpenDialog.Execute then
   begin
     FName:= OpenDialog.FileName;
     f := TFileStream.Create(FName, fmOpenRead or fmShareDenyWrite);
-    J := GetJSON(f);
-    jArray := TJSONArray(J.FindPath('pbox'));
-    SetLength(FFigureArray, jArray.Count);
-    for i := 0 to jArray.Count - 1 do begin
-      ClassNames := jArray.Objects[i].FindPath('FigureClass').AsString;
-      FFigureArray[i] := GetFigure(AddFigure(StrToClassFigure(ClassNames)));
-      jPoints := TJSONArray(jArray.Objects[i].FindPath('Points'));
-      for k := 0 to jPoints.Count-1 do begin
-        FFigureArray[i].AddPoint(FloatPoint(jPoints.Arrays[k].Floats[0],
-        jPoints.Arrays[k].Floats[1]));
-      end;
-        FFigureArray[i].PenColor :=
-           jArray.Objects[i].FindPath('FigurePenColor').AsInteger;
-         FFigureArray[i].BrushColor :=
-           jArray.Objects[i].FindPath('FigureBrushColor').AsInteger;
-         FFigureArray[i].Width :=
-           jArray.Objects[i].FindPath('FigureWidth').AsInteger;
-         FFigureArray[i].Radius :=
-           jArray.Objects[i].FindPath('FigureRadius').AsInteger;
-         FFigureArray[i].PenStyle :=
-           NumToStyle(jArray.Objects[i].FindPath('FigurePenStyle').AsInteger);
-         FFigureArray[i].BrushStyle :=
-           NumToBrushStyle(jArray.Objects[i].FindPath('FigureBrushStyle').AsInteger);
+    J := TJSONObject(GetJSON(f));
+    FFigureArray := ReadFromJSON(J);
+    for i in FFigureArray do begin
+      AddFigure(i);
     end;
     FreeAndNil(f);
   end;
@@ -184,6 +172,63 @@ procedure TMainForm.DeselectClick(Sender: TObject);
 begin
   UnSelectAll();
   PaintBox.Invalidate();
+end;
+
+procedure TMainForm.miCopySelectedClick(Sender: TObject);
+var
+  jObject: TJSONObject;
+  cfPaint: TClipboardFormat;
+  s: TStringStream;
+begin
+  jObject := SaveToJSON(true);
+  Clipboard.Open;
+  if jObject.Arrays['pbox'].Count > 0 then
+  begin
+    cfPaint := Clipboard.FindFormatID('paint_vector');
+    if cfPaint = 0 then
+      cfPaint := RegisterClipboardFormat('paint_vector');
+    s := TStringStream.Create(jObject.AsJSON);
+    Clipboard.AddFormat(cfPaint, s);
+    FreeAndNil(jObject);
+    FreeAndNil(s);
+  end;
+  Clipboard.Close;
+end;
+
+procedure TMainForm.miCutSelectedClick(Sender: TObject);
+begin
+  miCopySelectedClick(nil);
+  DeleteBtnClick(nil);
+end;
+
+procedure TMainForm.miPasteSelectedClick(Sender: TObject);
+var
+  cfPaint: TClipboardFormat;
+  s: TStringStream;
+  jObject: TJSONObject;
+  FFigures: TCanvasFigures;
+  FFigure: TCanvasFigure;
+begin
+  cfPaint := Clipboard.FindFormatID('paint_vector');
+  if cfPaint = 0 then
+    cfPaint := RegisterClipboardFormat('paint_vector');
+  s := TStringStream.Create('');
+  if Clipboard.GetFormat(cfPaint, s) then
+  begin
+    UnSelectAll();
+    jObject := TJSONObject(GetJSON(s.DataString));
+    FFigures := ReadFromJSON(jObject);
+    for FFigure in FFigures do
+      if FFigure <> nil then
+      begin
+        AddFigure(FFigure);
+        FFigure.Selected := true;
+      end;
+    FreeAndNil(jObject);
+    FreeAndNil(s);
+    AddUndoRedo();
+  end;
+  Invalidate();
 end;
 
 procedure TMainForm.miRedoClick(Sender: TObject);
@@ -238,42 +283,11 @@ end;
 
 procedure TMainForm.SaveClickClick(Sender: TObject);
 var
-  i, j, len:integer;
-  Points:TPointArray;
-  jObject, jFigure: TJSONObject;
-  jArray, jSecArray: TJSONArray;
+  jObject: TJSONObject;
   FName: String;
 begin
   if SaveDialog.Execute then begin
-    jObject := TJSONObject.Create;
-    jObject.Add('pbox', TJSONArray.Create);
-    for i:= 0 to FiguresCount()-1 do
-    begin
-      jFigure := TJSONObject.Create;
-        jFigure.Add('FigureClass', GetFigure(i).ClassName);
-	Points := GetFigure(i).GetCanvasPoints();
-        len := Length(Points) - 1;
-        jArray := TJSONArray.Create;
-        for j := 0 to len do begin
-          jSecArray := TJSONArray.Create;
-          jSecArray.Add(Points[j].x);
-          jSecArray.Add(Points[j].y);
-          jArray.Add(jSecArray);
-        end;
-        jFigure.Add('Points',jArray);
-        if (GetFigure(i).ClassName <> 'FFigureEmpty')
-        and (GetFigure(i).ClassName <> 'FFigureAllotment') then begin
-
-          jFigure.Add('FigurePenColor', GetFigure(i).PenColor);
-          jFigure.Add('FigurePenStyle',  StyleToNum(GetFigure(i).PenStyle));
-          jFigure.Add('FigureWidth', GetFigure(i).Width);
-          jFigure.Add('FigureBrushColor', GetFigure(i).BrushColor);
-          jFigure.Add('FigureBrushStyle',BrushStyleToNum(GetFigure(i).BrushStyle));
-          jFigure.Add('FigureRadius', GetFigure(i).Radius);
-
-        end;
-        jObject.Arrays['pbox'].Add(jFigure);
-    end;
+    jObject := SaveToJSON(false);
     FName:= SaveDialog.FileName;
     Memo1.Lines.Add(jObject.FormatJSON);
     Memo1.Lines.SaveToFile(FName);
@@ -343,6 +357,73 @@ end;
 function TMainForm.IntToColor(Value: Integer): TColor;
 begin
   Result:=Value;
+end;
+
+function TMainForm.SaveToJSON(OnlySelected: Boolean): TJSONObject;
+var
+  i, j, len:integer;
+  Points:TPointArray;
+  jFigure: TJSONObject;
+  jArray, jSecArray: TJSONArray;
+begin
+  Result := TJSONObject.Create;
+  Result.Add('pbox', TJSONArray.Create);
+  for i:= 0 to FiguresCount()-1 do
+    if (not OnlySelected) or GetFigure(i).Selected then begin
+      jFigure := TJSONObject.Create;
+      jFigure.Add('FigureClass', GetFigure(i).ClassName);
+      Points := GetFigure(i).GetCanvasPoints();
+      len := Length(Points) - 1;
+      jArray := TJSONArray.Create;
+      for j := 0 to len do begin
+        jSecArray := TJSONArray.Create;
+        jSecArray.Add(Points[j].x);
+        jSecArray.Add(Points[j].y);
+        jArray.Add(jSecArray);
+      end;
+      jFigure.Add('Points',jArray);
+      if (GetFigure(i).ClassName <> 'FFigureEmpty')
+      and (GetFigure(i).ClassName <> 'FFigureAllotment') then begin
+        jFigure.Add('FigurePenColor', GetFigure(i).PenColor);
+        jFigure.Add('FigurePenStyle',  StyleToNum(GetFigure(i).PenStyle));
+        jFigure.Add('FigureWidth', GetFigure(i).Width);
+        jFigure.Add('FigureBrushColor', GetFigure(i).BrushColor);
+        jFigure.Add('FigureBrushStyle',BrushStyleToNum(GetFigure(i).BrushStyle));
+        jFigure.Add('FigureRadius', GetFigure(i).Radius);
+      end;
+      Result.Arrays['pbox'].Add(jFigure);
+    end;
+end;
+
+function TMainForm.ReadFromJSON(J: TJSONObject): TCanvasFigures;
+var
+  i, k:integer;
+  ClassNames: String;
+  jArray, jPoints: TJSONArray;
+begin
+    jArray := TJSONArray(J.FindPath('pbox'));
+    SetLength(Result, jArray.Count);
+    for i := 0 to jArray.Count - 1 do begin
+      ClassNames := jArray.Objects[i].FindPath('FigureClass').AsString;
+      Result[i] := StrToClassFigure(ClassNames).Create();
+      jPoints := TJSONArray(jArray.Objects[i].FindPath('Points'));
+      for k := 0 to jPoints.Count-1 do begin
+        Result[i].AddPoint(FloatPoint(jPoints.Arrays[k].Floats[0],
+        jPoints.Arrays[k].Floats[1]));
+      end;
+        Result[i].PenColor :=
+           jArray.Objects[i].FindPath('FigurePenColor').AsInteger;
+         Result[i].BrushColor :=
+           jArray.Objects[i].FindPath('FigureBrushColor').AsInteger;
+         Result[i].Width :=
+           jArray.Objects[i].FindPath('FigureWidth').AsInteger;
+         Result[i].Radius :=
+           jArray.Objects[i].FindPath('FigureRadius').AsInteger;
+         Result[i].PenStyle :=
+           NumToStyle(jArray.Objects[i].FindPath('FigurePenStyle').AsInteger);
+         Result[i].BrushStyle :=
+           NumToBrushStyle(jArray.Objects[i].FindPath('FigureBrushStyle').AsInteger);
+    end;
 end;
 
 procedure TMainForm.SetScrollBar();

@@ -24,8 +24,11 @@ implementation
 procedure AddUndoRedo();
 var
   f, fClone: TCanvasFigure;
+  i: integer;
 begin
   UndoRedoIndex := UndoRedoIndex + 1;
+  for i := UndoRedoIndex to High(UndoRedoElements) do
+    UndoRedoElements[i] := nil;
   SetLength(UndoRedoElements, UndoRedoIndex+1);
   if Length(FiguresData) <> 0 then
   begin
